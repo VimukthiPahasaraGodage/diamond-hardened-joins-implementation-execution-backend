@@ -1,9 +1,9 @@
 import os
 from pathlib import Path
 
-from execution_tree import PlanNode
-from execution_tree import parse_plan
-from execution_tree_visualization import visualize_plan_tree
+from graph import PlanNode
+from graph import parse_plan
+from graph_visualization import visualize_plan_tree
 from code_generator import PlanCodeGenerator
 
 

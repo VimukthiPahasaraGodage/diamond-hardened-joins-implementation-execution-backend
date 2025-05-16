@@ -3,7 +3,7 @@ from typing import Optional
 
 from graphviz import Digraph
 
-from execution_tree import PlanNode
+from graph import PlanNode
 
 
 def escape_label(s):

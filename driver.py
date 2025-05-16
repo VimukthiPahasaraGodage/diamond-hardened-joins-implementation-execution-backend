@@ -1,6 +1,6 @@
 import os
 
-from execution_engine import ExecutionEngine
+from components.engine import ExecutionEngine
 
 if __name__ == '__main__':
     calcite_output_file = f'{os.getcwd()}/calcite_outputs/physical_plans_1.txt'
