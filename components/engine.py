@@ -1,10 +1,10 @@
 import os
 from pathlib import Path
 
-from graph import PlanNode
-from graph import parse_plan
-from graph_visualization import visualize_plan_tree
-from code_generator import PlanCodeGenerator
+from components.graph import PlanNode
+from components.graph import parse_plan
+from components.graph_visualization import visualize_plan_tree
+from components.code_generator import PlanCodeGenerator
 
 
 class ExecutionEngine:
