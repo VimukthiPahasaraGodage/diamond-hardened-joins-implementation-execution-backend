@@ -2,13 +2,16 @@ from typing import List
 
 from components.code_generator_components.aggregate_condition import aggregate_condition
 from components.code_generator_components.filter_condition import filter_condition
+from components.code_generator_components.join_algorithms.hash_join_algorithm import partitioned_hash_join_function
 from components.code_generator_components.join_condition import join_condition
 from components.code_generator_components.projection_condition import projection_condition
 
 
 class PlanCodeGenerator:
-    def __init__(self, root):
+    def __init__(self, root, prefix, join_method: str):
         self.root = root
+        self.prefix = prefix
+        self.join_method = join_method  # 'auto', 'hash-join', 'nested-loop-join', 'LE-decomp'
         self.code_lines: List[str] = []
 
     def generate(self) -> str:
@@ -25,19 +28,33 @@ class PlanCodeGenerator:
 
     def _emit_header(self):
         self.code_lines += [
+            "import os",
             "import re",
             "import threading",
+            "import time",
+            "import psutil",
             "from collections import defaultdict",
             "from concurrent.futures import ThreadPoolExecutor",
             "from typing import List, Tuple, Union, Dict",
             "",
             "import pandas as pd",
             "",
-            "prefix = 'C:/JOB_dataset'"
+            "process = psutil.Process()",
+            "# storage for metrics",
+            "timings: Dict[int, float] = {}         # seconds spent in each node",
+            "mem_usage: Dict[int, int] = {}         # RSS in bytes after each node completes",
+            "row_counts: Dict[int, int] = {}        # number of rows output by each node",
+            "",
+            "# Will accumulate only join outputs:",
+            "total_intermediate_rows = 0",
+            "intermediate_lock = threading.Lock()",
+            "",
+            f"prefix = '{self.prefix}'"
         ]
 
     def _emit_functions_for_conditions(self):
-        code_blocks = [filter_condition.splitlines(),
+        code_blocks = [partitioned_hash_join_function.splitlines(),
+                       filter_condition.splitlines(),
                        aggregate_condition.splitlines(),
                        projection_condition.splitlines(),
                        join_condition.splitlines()]
@@ -100,68 +117,121 @@ class PlanCodeGenerator:
                 )
         self.code_lines.append("")
 
+    def _add_join_operation_routine(self):
+        if self.join_method == 'auto':
+            return [
+                "            l,r = children[nid]",
+                "            left_df = dfs[l]",
+                "            right_df = dfs[r]",
+                "            jt = at['joinType']",
+                "            cond = at['condition']",
+                "            params = build_merge_params(cond, jt, left_df.shape[1], right_df.shape[1])",
+                "            if params['cross']:",
+                "                left_df['_tmp'] = 1",
+                "                right_df['_tmp'] = 1",
+                "                df = left_df.merge(right_df, on='_tmp', how=params['how']).drop('_tmp', axis=1)",
+                "            else:",
+                "                df = left_df.merge(right_df, how=params['how'], left_on=params['left_on'], right_on=params['right_on'])",
+                "            df.columns = list(range(df.shape[1]))"
+            ]
+        elif self.join_method == 'hash-join':
+            return [
+                "            l,r = children[nid]",
+                "            left_df = dfs[l]",
+                "            right_df = dfs[r]",
+                "            jt = at['joinType']",
+                "            cond = at['condition']",
+                "            params = build_merge_params(cond, jt, left_df.shape[1], right_df.shape[1])",
+                "            if params['cross']:",
+                "                left_df['_tmp'] = 1",
+                "                right_df['_tmp'] = 1",
+                "                df = left_df.merge(right_df, on='_tmp', how=params['how']).drop('_tmp', axis=1)",
+                "            else:",
+                "                if params['how'] == 'inner':",
+                "                    df = partitioned_hash_join(",
+                "                        left_df,",
+                "                        right_df,",
+                "                        params['left_on'],",
+                "                        params['right_on'])",
+                "                else:",
+                "                    df = left_df.merge(right_df, how=params['how'], left_on=params['left_on'], right_on=params['right_on'])",
+                "            df.columns = list(range(df.shape[1]))"
+            ]
+        elif self.join_method == 'nested-loop-join':
+            pass
+        elif self.join_method == 'LE_decomposition':
+            pass
+        else:
+            raise ValueError(f"No such join method: {self.join_method}")
+
     def _emit_make_task(self):
         self.code_lines += [
-            "# --- task factory (no blocking) ---",
-            "def make_task(nid):",
-            "    def task():",
-            "        op = op_type[nid]",
-            "        at = attrs[nid]",
-            "        df = None",
-            "        if op=='TableScan':",
-            "            df = pd.read_csv(f\"{prefix}/{table_name[nid]}.csv\", header=None, low_memory=False)",
-            "        elif op=='Values':",
-            "            df = pd.DataFrame([[]])",
-            "        elif op=='Filter':",
-            "            child = children[nid][0]",
-            "            dfs_child = dfs[child]",
-            "            cond = condition_from_text(at['condition'])",
-            "            mask = eval_condition(cond, dfs_child)",
-            "            df = dfs_child[mask]",
-            "        elif op=='Project':",
-            "            child = children[nid][0]",
-            "            dfs_child = dfs[child]",
-            "            idxs, names = bindable_to_pandas_proj(at['projection'])",
-            "            df = dfs_child.iloc[:, idxs]",
-            f"           if nid == {self.root.node_id}:",
-            "                df.columns = names",
-            "            else:",
-            "                df.columns = [i for i in range(df.shape[1])]",
-            "        elif op=='Join':",
-            "            l,r = children[nid]",
-            "            left_df = dfs[l]",
-            "            right_df = dfs[r]",
-            "            jt = at['joinType']",
-            "            cond = at['condition']",
-            "            params = build_merge_params(cond, jt, left_df.shape[1], right_df.shape[1])",
-            "            if params['cross']:",
-            "                left_df['_tmp'] = 1",
-            "                right_df['_tmp'] = 1",
-            "                df = left_df.merge(right_df, on='_tmp', how=params['how']).drop('_tmp', axis=1)",
-            "            else:",
-            "                df = left_df.merge(right_df, how=params['how'], left_on=params['left_on'], right_on=params['right_on'])",
-            "            df.columns = list(range(df.shape[1]))",
-            "        elif op=='Aggregate':",
-            "            child = children[nid][0]",
-            "            dfs_child = dfs[child]",
-            "            group_cols, agg_map = parse_bindable_aggregate(at['aggregation'], dfs_child.shape[1])",
-            "            if group_cols:",
-            "                # regular GROUP BY",
-            "                df = (dfs_child.groupby(group_cols).agg(**agg_map).reset_index())",
-            "            else:",
-            "                # no GROUP BY → aggregate entire frame",
-            "                df = dfs_child.agg(**agg_map)",
-            "        else:",
-            "            raise ValueError(f'No such operation type: {op}')",
-            "        return df",
-            "    return task",
-            "",
-        ]
+                               "# --- task factory (no blocking) ---",
+                               "def make_task(nid):",
+                               "    def task():",
+                               "        global total_intermediate_rows",
+                               "        start = time.perf_counter()",
+                               "        before_mem = process.memory_info().rss",
+                               "",
+                               "        op = op_type[nid]",
+                               "        at = attrs[nid]",
+                               "        df = None",
+                               "        if op=='TableScan':",
+                               "            df = pd.read_csv(f\"{prefix}/{table_name[nid]}.csv\", header=None, low_memory=False)",
+                               "        elif op=='Values':",
+                               "            df = pd.DataFrame([[]])",
+                               "        elif op=='Filter':",
+                               "            child = children[nid][0]",
+                               "            dfs_child = dfs[child]",
+                               "            cond = condition_from_text(at['condition'])",
+                               "            mask = eval_condition(cond, dfs_child)",
+                               "            df = dfs_child[mask]",
+                               "        elif op=='Project':",
+                               "            child = children[nid][0]",
+                               "            dfs_child = dfs[child]",
+                               "            idxs, names = bindable_to_pandas_proj(at['projection'])",
+                               "            df = dfs_child.iloc[:, idxs]",
+                               f"            if nid == {self.root.node_id}:",
+                               "                df.columns = names",
+                               "            else:",
+                               "                df.columns = [i for i in range(df.shape[1])]",
+                               "        elif op=='Join':"] + \
+                           self._add_join_operation_routine() + \
+                           [
+                               "        elif op=='Aggregate':",
+                               "            child = children[nid][0]",
+                               "            dfs_child = dfs[child]",
+                               "            group_cols, agg_map = parse_bindable_aggregate(at['aggregation'], dfs_child.shape[1])",
+                               "            if group_cols:",
+                               "                # regular GROUP BY",
+                               "                df = (dfs_child.groupby(group_cols).agg(**agg_map).reset_index())",
+                               "            else:",
+                               "                # no GROUP BY → aggregate entire frame",
+                               "                results = {}",
+                               "                for out_col, (col_idx, func) in agg_map.items():",
+                               "                    series = dfs_child.iloc[:, col_idx]",
+                               "                    results[out_col] = getattr(series, func)()",
+                               "                df = pd.DataFrame([results])",
+                               "        else:",
+                               "            raise ValueError(f'No such operation type: {op}')",
+                               "",
+                               "        elapsed = time.perf_counter() - start",
+                               "        timings[nid] = elapsed",
+                               "        row_counts[nid] = df.shape[0]",
+                               "        mem_usage[nid] = process.memory_info().rss - before_mem",
+                               "",
+                               "        if op == 'Join':",
+                               "            with intermediate_lock:",
+                               "                total_intermediate_rows += df.shape[0]",
+                               "        return df",
+                               "    return task",
+                               "",
+                           ]
 
     def _emit_scheduler(self):
         self.code_lines += [
             "# --- scheduler ---",
-            "executor = ThreadPoolExecutor(max_workers=8)",
+            f"executor = ThreadPoolExecutor(max_workers=len(op_type))",
             "futures = {}",
             "dfs = {}",
             "",
@@ -171,7 +241,7 @@ class PlanCodeGenerator:
             "    def _cb(fut):",
             "        print(f'[DONE] Node {nid}')",
             "        dfs[nid] = fut.result()",
-            f"       if nid == {self.root.node_id}",
+            f"        if nid == {self.root.node_id}:",
             "            root_finished.set()",
             "        for p in parents[nid]:",
             "            pending_inputs[p] -= 1",
@@ -181,6 +251,8 @@ class PlanCodeGenerator:
             "                futures[p] = f",
             "                f.add_done_callback(_make_callback(p))",
             "    return _cb",
+            "",
+            "overall_start = time.perf_counter()",
             "",
             "# submit leaves",
             "for nid, cnt in pending_inputs.items():",
@@ -194,7 +266,12 @@ class PlanCodeGenerator:
             "root_finished.wait()",
             "executor.shutdown()",
             "",
+            "overall_time = time.perf_counter() - overall_start",
+            "total_node_time = sum(timings.values())",
+            "",
             f"# Now dfs[{self.root.node_id}] should exist",
             f"result = dfs[{self.root.node_id}]",
-            "print(result.head())"
+            "print('\\nOutput\\n------------')",
+            "print(result.head())",
+            "print(f\"\\nMetrics: {{'total_node_time': {total_node_time}, 'overall_time': {overall_time}, 'intermediate_size': {total_intermediate_rows}, 'mem_usage': {mem_usage}, 'op_type': {op_type}}}\")"
         ]

@@ -10,10 +10,12 @@ class PlanNode:
     node_id: int
     children: List["PlanNode"] = field(default_factory=list)
 
+
 def strip_condition_brackets(text):
     if text.startswith("condition=[") and text.endswith("]"):
         return text[len("condition=["):-1]
     raise ValueError("The attributes does not match the pattern")
+
 
 def extract_table_name(line):
     match = re.search(r'table=\[\[(.*?)\]\]', line)
@@ -22,11 +24,13 @@ def extract_table_name(line):
     else:
         raise ValueError("The attributes does not match the pattern")
 
+
 def remove_bindable_prefix(s):
     prefix = "Bindable"
     if s.startswith(prefix):
         return s[len(prefix):]
     raise ValueError("The attributes does not match the pattern")
+
 
 def parse_plan(plan_text: str) -> PlanNode:
     lines = [line.rstrip() for line in plan_text.strip().split("\n") if line.strip()]
