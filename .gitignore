@@ -1,6 +1,7 @@
 .ipynb_checkpoints
 .virtual_documents
 anaconda_projects
-notebooks
+notebooks/.ipynb_checkpoints
+notebooks/*.txt
 visualization_outputs
 generated_codes

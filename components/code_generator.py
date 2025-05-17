@@ -122,7 +122,10 @@ class PlanCodeGenerator:
             "            dfs_child = dfs[child]",
             "            idxs, names = bindable_to_pandas_proj(at['projection'])",
             "            df = dfs_child.iloc[:, idxs]",
-            "            df.columns = names",
+            f"           if nid == {self.root.node_id}:",
+            "                df.columns = names",
+            "            else:"
+            "                df.columns = [i for i in range(df.shape[1])]",
             "        elif op=='Join':",
             "            l,r = children[nid]",
             "            left_df = dfs[l]",
