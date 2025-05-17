@@ -33,7 +33,7 @@ class PlanCodeGenerator:
             "",
             "import pandas as pd",
             "",
-            "prefix = 'C:\JOB_dataset'"
+            "prefix = 'C:/JOB_dataset'"
         ]
 
     def _emit_functions_for_conditions(self):
