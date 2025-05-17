@@ -1,5 +1,10 @@
-import re
-from typing import Dict, List
+from typing import List
+
+from components.code_generator_components.aggregate_condition import aggregate_condition
+from components.code_generator_components.filter_condition import filter_condition
+from components.code_generator_components.join_condition import join_condition
+from components.code_generator_components.projection_condition import projection_condition
+
 
 class PlanCodeGenerator:
     def __init__(self, root):
@@ -8,31 +13,45 @@ class PlanCodeGenerator:
 
     def generate(self) -> str:
         self.code_lines = []
-        self._emit_header()
         all_nodes = self._collect_nodes(self.root)
 
+        self._emit_header()
+        self._emit_functions_for_conditions()
         self._emit_dependency_maps(all_nodes)
         self._emit_metadata_maps(all_nodes)
-        self._emit_translators()
         self._emit_make_task()
         self._emit_scheduler()
         return "\n".join(self.code_lines)
 
     def _emit_header(self):
         self.code_lines += [
+            "import concurrent.futures",
             "import re",
-            "import pandas as pd",
-            "from concurrent.futures import ThreadPoolExecutor",
             "from collections import defaultdict",
+            "from concurrent.futures import ThreadPoolExecutor",
+            "from typing import List, Tuple, Union, Dict",
+            "import pandas as pd",
             "",
+            "prefix = 'D:/UoM/Semester_8/CS4633_Database_Internals/JOB/JOB_database/final_final'"
         ]
+
+    def _emit_functions_for_conditions(self):
+        code_blocks = [filter_condition.splitlines(),
+                       aggregate_condition.splitlines(),
+                       projection_condition.splitlines(),
+                       join_condition.splitlines()]
+        for code_block in code_blocks:
+            for _, line in enumerate(code_block):
+                self.code_lines.append(line)
 
     def _collect_nodes(self, root):
         nodes = []
+
         def dfs(n):
             nodes.append(n)
             for c in n.children:
                 dfs(c)
+
         dfs(root)
         return nodes
 
@@ -72,47 +91,13 @@ class PlanCodeGenerator:
         self.code_lines.append("}")
         self.code_lines.append("")
         # table_name
-        self.code_lines.append("def _extract_table_name(table_attr):")
-        self.code_lines.append("    return table_attr.replace('[[','').replace(']]','').split('.')[-1]")
-        self.code_lines.append("")
         self.code_lines.append("table_name = {}")
         for n in nodes:
-            if n.op_type == "BindableTableScan":
+            if n.op_type == "TableScan":
                 self.code_lines.append(
-                    f"table_name[{n.node_id}] = _extract_table_name(attrs[{n.node_id}].get('table',''))"
+                    f"table_name[{n.node_id}] = attrs[{n.node_id}].get('table','')"
                 )
         self.code_lines.append("")
-
-    def _emit_translators(self):
-        self.code_lines += [
-            "# --- translators ---",
-            "def translate_condition(cond):",
-            "    s = cond",
-            r"    s = re.sub(r\"LIKE\(\$(\d+),\s*'(.*?)'\)\",",
-            r"                 r\"dfs_child['col\1'].str.contains(r'\2')\", s)",
-            "    s = s.replace('AND', ' & ').replace('OR', ' | ')",
-            "    s = s.replace('=', '==').replace('<>', '!=')",
-            "    return s",
-            "",
-            "def translate_join(cond):",
-            "    nums = re.findall(r\"\\$([0-9]+)\", cond)",
-            "    if len(nums)==2:",
-            "        return {'left_on': f'col{nums[0]}', 'right_on': f'col{nums[1]}'}",
-            "    if len(nums)%2==0:",
-            "        L = [f'col{nums[i]}' for i in range(0,len(nums),2)]",
-            "        R = [f'col{nums[i]}' for i in range(1,len(nums),2)]",
-            "        return {'left_on': L, 'right_on': R}",
-            "    return {}",
-            "",
-            "def translate_aggs(at):",
-            "    out = {}",
-            "    for alias, expr in at.items():",
-            "        m = re.search(r'MIN\\(\\$(\\d+)\\)', expr)",
-            "        if m:",
-            "            out[alias.lower()] = (f'col{m.group(1)}','min')",
-            "    return out",
-            "",
-        ]
 
     def _emit_make_task(self):
         self.code_lines += [
@@ -122,28 +107,48 @@ class PlanCodeGenerator:
             "        op = op_type[nid]",
             "        at = attrs[nid]",
             "        df = None",
-            "        if op=='BindableTableScan':",
-            "            df = pd.read_csv(f\"{table_name[nid]}.csv\")",
-            "        elif op=='BindableValues':",
+            "        if op=='TableScan':",
+            "            df = pd.read_csv(f\"{prefix}/{table_name[nid]}.csv\", header=None, low_memory=False)",
+            "        elif op=='Values':",
             "            df = pd.DataFrame([[]])",
-            "        elif op=='BindableFilter':",
+            "        elif op=='Filter':",
             "            child = children[nid][0]",
             "            dfs_child = dfs[child]",
-            "            cond = translate_condition(at.get('condition',''))",
-            "            df = dfs_child.query(cond)",
-            "        elif op=='BindableProject':",
+            "            cond = condition_from_text(at['condition'])",
+            "            mask = eval_condition(cond, dfs_child)",
+            "            df = dfs_child[mask]",
+            "        elif op=='Project':",
             "            child = children[nid][0]",
-            "            df = dfs[child][list(at.keys())]",
-            "        elif op=='BindableJoin':",
+            "            dfs_child = dfs[child]",
+            "            idxs, names = bindable_to_pandas_proj(at['projection'])",
+            "            df = dfs_child.iloc[:, idxs]",
+            "            df.columns = names",
+            "        elif op=='Join':",
             "            l,r = children[nid]",
-            "            jt = at.get('joinType','inner').strip('[]')",
-            "            on = translate_join(at.get('condition',''))",
-            "            df = pd.merge(dfs[l], dfs[r], how=jt, **on)",
-            "        elif op=='BindableAggregate':",
+            "            left_df = dfs[l]",
+            "            right_df = dfs[r]",
+            "            jt = at['joinType']",
+            "            cond = at['condition']",
+            "            params = build_merge_params(cond, jt, left_df.shape[1], right_df.shape[1])",
+            "            if params['cross']:",
+            "                left_df['_tmp'] = 1",
+            "                right_df['_tmp'] = 1",
+            "                df = left_df.merge(right_df, on='_tmp', how=params['how']).drop('_tmp', axis=1)",
+            "            else:",
+            "                df = left_df.merge(right_df, how=params['how'], left_on=params['left_on'], right_on=params['right_on'])",
+            "            df.columns = list(range(df.shape[1]))",
+            "        elif op=='Aggregate':",
             "            child = children[nid][0]",
-            "            df = dfs[child].agg(translate_aggs(at)).reset_index(drop=True)",
+            "            dfs_child = dfs[child]",
+            "            group_cols, agg_map = parse_bindable_aggregate(at['aggregation'], dfs_child.shape[1])",
+            "            if group_cols:",
+            "                # regular GROUP BY",
+            "                df = (dfs_child.groupby(group_cols).agg(**agg_map).reset_index())",
+            "            else:",
+            "                # no GROUP BY → aggregate entire frame",
+            "                df = dfs_child.agg(**agg_map)",
             "        else:",
-            "            df = pd.DataFrame()",
+            "            raise ValueError(f'No such operation type: {op}')",
             "        return df",
             "    return task",
             "",
@@ -158,10 +163,12 @@ class PlanCodeGenerator:
             "",
             "def _make_callback(nid):",
             "    def _cb(fut):",
+            "        print(f'[DONE] Node {nid}')",
             "        dfs[nid] = fut.result()",
             "        for p in parents[nid]:",
             "            pending_inputs[p] -= 1",
             "            if pending_inputs[p]==0:",
+            "                print(f'[SCHEDULING] Node {p}')",
             "                f = executor.submit(make_task(p))",
             "                futures[p] = f",
             "                f.add_done_callback(_make_callback(p))",
@@ -174,8 +181,11 @@ class PlanCodeGenerator:
             "        futures[nid] = f",
             "        f.add_done_callback(_make_callback(nid))",
             "",
-            f"# wait for root {self.root.node_id}",
-            f"result = futures[{self.root.node_id}].result()",
-            "print(result.head())",
+            "# Wait for all futures to complete",
+            "concurrent.futures.wait(futures.values())",
             "executor.shutdown()",
+            "",
+            f"# Now dfs[{self.root.node_id}] should exist",
+            f"result = dfs[{self.root.node_id}]",
+            "print(result.head())"
         ]

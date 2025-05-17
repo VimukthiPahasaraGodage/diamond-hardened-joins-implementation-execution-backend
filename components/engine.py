@@ -83,7 +83,7 @@ class ExecutionEngine:
         generated_code = PlanCodeGenerator(root_node).generate()
         return generated_code
 
-    def execute_queries(self, visualize=False):
+    def execute_queries(self, visualize=True):
         execution_trees = self.parse_physical_plan_to_execution_tree()
         index = 0
         for root_node in execution_trees:
