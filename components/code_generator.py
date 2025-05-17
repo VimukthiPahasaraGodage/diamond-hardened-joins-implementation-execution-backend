@@ -125,7 +125,7 @@ class PlanCodeGenerator:
             "            df = dfs_child.iloc[:, idxs]",
             f"           if nid == {self.root.node_id}:",
             "                df.columns = names",
-            "            else:"
+            "            else:",
             "                df.columns = [i for i in range(df.shape[1])]",
             "        elif op=='Join':",
             "            l,r = children[nid]",
