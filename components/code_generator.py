@@ -25,14 +25,15 @@ class PlanCodeGenerator:
 
     def _emit_header(self):
         self.code_lines += [
-            "import concurrent.futures",
             "import re",
+            "import threading",
             "from collections import defaultdict",
             "from concurrent.futures import ThreadPoolExecutor",
             "from typing import List, Tuple, Union, Dict",
+            "",
             "import pandas as pd",
             "",
-            "prefix = 'D:/UoM/Semester_8/CS4633_Database_Internals/JOB/JOB_database/final_final'"
+            "prefix = 'C:\JOB_dataset'"
         ]
 
     def _emit_functions_for_conditions(self):
@@ -122,7 +123,10 @@ class PlanCodeGenerator:
             "            dfs_child = dfs[child]",
             "            idxs, names = bindable_to_pandas_proj(at['projection'])",
             "            df = dfs_child.iloc[:, idxs]",
-            "            df.columns = names",
+            f"           if nid == {self.root.node_id}:",
+            "                df.columns = names",
+            "            else:"
+            "                df.columns = [i for i in range(df.shape[1])]",
             "        elif op=='Join':",
             "            l,r = children[nid]",
             "            left_df = dfs[l]",
@@ -161,10 +165,14 @@ class PlanCodeGenerator:
             "futures = {}",
             "dfs = {}",
             "",
+            "root_finished = threading.Event()",
+            "",
             "def _make_callback(nid):",
             "    def _cb(fut):",
             "        print(f'[DONE] Node {nid}')",
             "        dfs[nid] = fut.result()",
+            f"       if nid == {self.root.node_id}",
+            "            root_finished.set()",
             "        for p in parents[nid]:",
             "            pending_inputs[p] -= 1",
             "            if pending_inputs[p]==0:",
@@ -177,12 +185,13 @@ class PlanCodeGenerator:
             "# submit leaves",
             "for nid, cnt in pending_inputs.items():",
             "    if cnt==0:",
+            "        print(f'[SCHEDULING] Node {nid}')",
             "        f = executor.submit(make_task(nid))",
             "        futures[nid] = f",
             "        f.add_done_callback(_make_callback(nid))",
             "",
-            "# Wait for all futures to complete",
-            "concurrent.futures.wait(futures.values())",
+            "# Wait for all tasks to complete",
+            "root_finished.wait()",
             "executor.shutdown()",
             "",
             f"# Now dfs[{self.root.node_id}] should exist",
