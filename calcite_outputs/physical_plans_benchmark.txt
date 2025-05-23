@@ -1,0 +1,1012 @@
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT F.id, A.value_a FROM F JOIN D ON F.d_id = D.id JOIN E ON F.e_id = E.id JOIN B ON D.b_id = B.id JOIN C ON D.c_id = C.id JOIN A ON B.a_id = A.id AND C.a_id = A.id
+
+[SqlNode]
+SELECT `F`.`ID`, `A`.`VALUE_A`
+FROM `F`
+INNER JOIN `D` ON `F`.`D_ID` = `D`.`ID`
+INNER JOIN `E` ON `F`.`E_ID` = `E`.`ID`
+INNER JOIN `B` ON `D`.`B_ID` = `B`.`ID`
+INNER JOIN `C` ON `D`.`C_ID` = `C`.`ID`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID` AND `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT `F`.`ID`, `A`.`VALUE_A`
+FROM `F`
+INNER JOIN `D` ON `F`.`d_id` = `D`.`id`
+INNER JOIN `E` ON `F`.`e_id` = `E`.`id`
+INNER JOIN `B` ON `D`.`b_id` = `B`.`id`
+INNER JOIN `C` ON `D`.`c_id` = `C`.`id`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id` AND `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0], VALUE_A=[$19])
+  LogicalJoin(condition=[AND(=($13, $18), =($16, $18))], joinType=[inner])
+    LogicalJoin(condition=[=($6, $15)], joinType=[inner])
+      LogicalJoin(condition=[=($5, $12)], joinType=[inner])
+        LogicalJoin(condition=[=($2, $8)], joinType=[inner])
+          LogicalJoin(condition=[=($1, $4)], joinType=[inner])
+            LogicalTableScan(table=[[F]])
+            LogicalTableScan(table=[[D]])
+          LogicalTableScan(table=[[E]])
+        LogicalTableScan(table=[[B]])
+      LogicalTableScan(table=[[C]])
+    LogicalTableScan(table=[[A]])
+
+
+[Physical plan]
+BindableProject(ID=[$0], VALUE_A=[$19]), id = 5681
+  BindableJoin(condition=[AND(=($13, $18), =($16, $18))], joinType=[inner]), id = 5680
+    BindableJoin(condition=[=($6, $15)], joinType=[inner]), id = 5679
+      BindableJoin(condition=[=($5, $12)], joinType=[inner]), id = 5678
+        BindableJoin(condition=[=($2, $8)], joinType=[inner]), id = 5677
+          BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 5676
+            BindableTableScan(table=[[F]]), id = 47
+            BindableTableScan(table=[[D]]), id = 51
+          BindableTableScan(table=[[E]]), id = 63
+        BindableTableScan(table=[[B]]), id = 83
+      BindableTableScan(table=[[C]]), id = 103
+    BindableTableScan(table=[[A]]), id = 123
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT F.id FROM F JOIN D ON F.d_id = D.id JOIN E ON F.e_id = E.id JOIN C ON D.c_id = C.id JOIN B ON E.b_id = B.id JOIN A ON B.a_id = A.id AND C.a_id = A.id
+
+[SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `D` ON `F`.`D_ID` = `D`.`ID`
+INNER JOIN `E` ON `F`.`E_ID` = `E`.`ID`
+INNER JOIN `C` ON `D`.`C_ID` = `C`.`ID`
+INNER JOIN `B` ON `E`.`B_ID` = `B`.`ID`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID` AND `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `D` ON `F`.`d_id` = `D`.`id`
+INNER JOIN `E` ON `F`.`e_id` = `E`.`id`
+INNER JOIN `C` ON `D`.`c_id` = `C`.`id`
+INNER JOIN `B` ON `E`.`b_id` = `B`.`id`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id` AND `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0])
+  LogicalJoin(condition=[AND(=($16, $18), =($13, $18))], joinType=[inner])
+    LogicalJoin(condition=[=($9, $15)], joinType=[inner])
+      LogicalJoin(condition=[=($6, $12)], joinType=[inner])
+        LogicalJoin(condition=[=($2, $8)], joinType=[inner])
+          LogicalJoin(condition=[=($1, $4)], joinType=[inner])
+            LogicalTableScan(table=[[F]])
+            LogicalTableScan(table=[[D]])
+          LogicalTableScan(table=[[E]])
+        LogicalTableScan(table=[[C]])
+      LogicalTableScan(table=[[B]])
+    LogicalTableScan(table=[[A]])
+
+
+[Physical plan]
+BindableProject(ID=[$0]), id = 22725
+  BindableJoin(condition=[AND(=($16, $18), =($13, $18))], joinType=[inner]), id = 22724
+    BindableJoin(condition=[=($9, $15)], joinType=[inner]), id = 22723
+      BindableJoin(condition=[=($6, $12)], joinType=[inner]), id = 22722
+        BindableJoin(condition=[=($2, $8)], joinType=[inner]), id = 22721
+          BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 22720
+            BindableTableScan(table=[[F]]), id = 5729
+            BindableTableScan(table=[[D]]), id = 5733
+          BindableTableScan(table=[[E]]), id = 5745
+        BindableTableScan(table=[[C]]), id = 5765
+      BindableTableScan(table=[[B]]), id = 5785
+    BindableTableScan(table=[[A]]), id = 5805
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT A.id, COUNT(*) FROM A JOIN B ON A.id = B.a_id JOIN C ON A.id = C.a_id JOIN D ON B.id = D.b_id JOIN E ON C.id = E.c_id JOIN F ON D.id = F.d_id AND E.id = F.e_id GROUP BY A.id
+
+[SqlNode]
+SELECT `A`.`ID`, COUNT(*)
+FROM `A`
+INNER JOIN `B` ON `A`.`ID` = `B`.`A_ID`
+INNER JOIN `C` ON `A`.`ID` = `C`.`A_ID`
+INNER JOIN `D` ON `B`.`ID` = `D`.`B_ID`
+INNER JOIN `E` ON `C`.`ID` = `E`.`C_ID`
+INNER JOIN `F` ON `D`.`ID` = `F`.`D_ID` AND `E`.`ID` = `F`.`E_ID`
+GROUP BY `A`.`ID`
+
+[Valid SqlNode]
+SELECT `A`.`ID`, COUNT(*)
+FROM `A`
+INNER JOIN `B` ON `A`.`id` = `B`.`a_id`
+INNER JOIN `C` ON `A`.`id` = `C`.`a_id`
+INNER JOIN `D` ON `B`.`id` = `D`.`b_id`
+INNER JOIN `E` ON `C`.`id` = `E`.`c_id`
+INNER JOIN `F` ON `D`.`id` = `F`.`d_id` AND `E`.`id` = `F`.`e_id`
+GROUP BY `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0], EXPR$1=[$1])
+  LogicalAggregate(group=[{0}], EXPR$1=[COUNT()])
+    LogicalProject(id=[$0])
+      LogicalJoin(condition=[AND(=($8, $17), =($12, $18))], joinType=[inner])
+        LogicalJoin(condition=[=($5, $14)], joinType=[inner])
+          LogicalJoin(condition=[=($2, $9)], joinType=[inner])
+            LogicalJoin(condition=[=($0, $6)], joinType=[inner])
+              LogicalJoin(condition=[=($0, $3)], joinType=[inner])
+                LogicalTableScan(table=[[A]])
+                LogicalTableScan(table=[[B]])
+              LogicalTableScan(table=[[C]])
+            LogicalTableScan(table=[[D]])
+          LogicalTableScan(table=[[E]])
+        LogicalTableScan(table=[[F]])
+
+
+[Physical plan]
+BindableProject(ID=[$0], EXPR$1=[$1]), id = 39787
+  BindableAggregate(group=[{0}], EXPR$1=[COUNT()]), id = 39786
+    BindableProject(id=[$0]), id = 39785
+      BindableJoin(condition=[AND(=($8, $17), =($12, $18))], joinType=[inner]), id = 39784
+        BindableJoin(condition=[=($5, $14)], joinType=[inner]), id = 39783
+          BindableJoin(condition=[=($2, $9)], joinType=[inner]), id = 39782
+            BindableJoin(condition=[=($0, $6)], joinType=[inner]), id = 39781
+              BindableJoin(condition=[=($0, $3)], joinType=[inner]), id = 39780
+                BindableTableScan(table=[[A]]), id = 22781
+                BindableTableScan(table=[[B]]), id = 22785
+              BindableTableScan(table=[[C]]), id = 22797
+            BindableTableScan(table=[[D]]), id = 22817
+          BindableTableScan(table=[[E]]), id = 22837
+        BindableTableScan(table=[[F]]), id = 22857
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT F.id FROM F JOIN E ON F.e_id = E.id JOIN D ON F.d_id = D.id JOIN C ON E.c_id = C.id AND D.c_id = C.id JOIN B ON D.b_id = B.id AND E.b_id = B.id JOIN A ON B.a_id = A.id AND C.a_id = A.id
+
+[SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `E` ON `F`.`E_ID` = `E`.`ID`
+INNER JOIN `D` ON `F`.`D_ID` = `D`.`ID`
+INNER JOIN `C` ON `E`.`C_ID` = `C`.`ID` AND `D`.`C_ID` = `C`.`ID`
+INNER JOIN `B` ON `D`.`B_ID` = `B`.`ID` AND `E`.`B_ID` = `B`.`ID`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID` AND `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `E` ON `F`.`e_id` = `E`.`id`
+INNER JOIN `D` ON `F`.`d_id` = `D`.`id`
+INNER JOIN `C` ON `E`.`c_id` = `C`.`id` AND `D`.`c_id` = `C`.`id`
+INNER JOIN `B` ON `D`.`b_id` = `B`.`id` AND `E`.`b_id` = `B`.`id`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id` AND `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0])
+  LogicalJoin(condition=[AND(=($16, $18), =($13, $18))], joinType=[inner])
+    LogicalJoin(condition=[AND(=($9, $15), =($5, $15))], joinType=[inner])
+      LogicalJoin(condition=[AND(=($6, $12), =($10, $12))], joinType=[inner])
+        LogicalJoin(condition=[=($1, $8)], joinType=[inner])
+          LogicalJoin(condition=[=($2, $4)], joinType=[inner])
+            LogicalTableScan(table=[[F]])
+            LogicalTableScan(table=[[E]])
+          LogicalTableScan(table=[[D]])
+        LogicalTableScan(table=[[C]])
+      LogicalTableScan(table=[[B]])
+    LogicalTableScan(table=[[A]])
+
+
+[Physical plan]
+BindableProject(ID=[$0]), id = 84651
+  BindableJoin(condition=[AND(=($16, $18), =($13, $18))], joinType=[inner]), id = 84650
+    BindableJoin(condition=[AND(=($9, $15), =($5, $15))], joinType=[inner]), id = 84649
+      BindableJoin(condition=[AND(=($6, $12), =($10, $12))], joinType=[inner]), id = 84648
+        BindableJoin(condition=[=($1, $8)], joinType=[inner]), id = 84647
+          BindableJoin(condition=[=($2, $4)], joinType=[inner]), id = 84646
+            BindableTableScan(table=[[F]]), id = 39835
+            BindableTableScan(table=[[E]]), id = 39839
+          BindableTableScan(table=[[D]]), id = 39851
+        BindableTableScan(table=[[C]]), id = 39871
+      BindableTableScan(table=[[B]]), id = 39899
+    BindableTableScan(table=[[A]]), id = 39919
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT D.id FROM D JOIN B ON D.b_id = B.id JOIN C ON D.c_id = C.id JOIN A ON B.a_id = A.id AND C.a_id = A.id
+
+[SqlNode]
+SELECT `D`.`ID`
+FROM `D`
+INNER JOIN `B` ON `D`.`B_ID` = `B`.`ID`
+INNER JOIN `C` ON `D`.`C_ID` = `C`.`ID`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID` AND `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT `D`.`ID`
+FROM `D`
+INNER JOIN `B` ON `D`.`b_id` = `B`.`id`
+INNER JOIN `C` ON `D`.`c_id` = `C`.`id`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id` AND `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0])
+  LogicalJoin(condition=[AND(=($5, $10), =($8, $10))], joinType=[inner])
+    LogicalJoin(condition=[=($2, $7)], joinType=[inner])
+      LogicalJoin(condition=[=($1, $4)], joinType=[inner])
+        LogicalTableScan(table=[[D]])
+        LogicalTableScan(table=[[B]])
+      LogicalTableScan(table=[[C]])
+    LogicalTableScan(table=[[A]])
+
+
+[Physical plan]
+BindableProject(ID=[$0]), id = 86253
+  BindableJoin(condition=[AND(=($5, $10), =($8, $10))], joinType=[inner]), id = 86252
+    BindableJoin(condition=[=($2, $7)], joinType=[inner]), id = 86251
+      BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 86250
+        BindableTableScan(table=[[D]]), id = 84685
+        BindableTableScan(table=[[B]]), id = 84689
+      BindableTableScan(table=[[C]]), id = 84701
+    BindableTableScan(table=[[A]]), id = 84721
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT E.id FROM E JOIN B ON E.b_id = B.id JOIN C ON E.c_id = C.id JOIN A ON B.a_id = A.id AND C.a_id = A.id
+
+[SqlNode]
+SELECT `E`.`ID`
+FROM `E`
+INNER JOIN `B` ON `E`.`B_ID` = `B`.`ID`
+INNER JOIN `C` ON `E`.`C_ID` = `C`.`ID`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID` AND `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT `E`.`ID`
+FROM `E`
+INNER JOIN `B` ON `E`.`b_id` = `B`.`id`
+INNER JOIN `C` ON `E`.`c_id` = `C`.`id`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id` AND `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0])
+  LogicalJoin(condition=[AND(=($5, $10), =($8, $10))], joinType=[inner])
+    LogicalJoin(condition=[=($2, $7)], joinType=[inner])
+      LogicalJoin(condition=[=($1, $4)], joinType=[inner])
+        LogicalTableScan(table=[[E]])
+        LogicalTableScan(table=[[B]])
+      LogicalTableScan(table=[[C]])
+    LogicalTableScan(table=[[A]])
+
+
+[Physical plan]
+BindableProject(ID=[$0]), id = 87855
+  BindableJoin(condition=[AND(=($5, $10), =($8, $10))], joinType=[inner]), id = 87854
+    BindableJoin(condition=[=($2, $7)], joinType=[inner]), id = 87853
+      BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 87852
+        BindableTableScan(table=[[E]]), id = 86287
+        BindableTableScan(table=[[B]]), id = 86291
+      BindableTableScan(table=[[C]]), id = 86303
+    BindableTableScan(table=[[A]]), id = 86323
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT F.id FROM F JOIN D ON F.d_id = D.id JOIN B ON D.b_id = B.id JOIN A ON B.a_id = A.id JOIN E ON F.e_id = E.id JOIN C ON E.c_id = C.id AND C.a_id = A.id
+
+[SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `D` ON `F`.`D_ID` = `D`.`ID`
+INNER JOIN `B` ON `D`.`B_ID` = `B`.`ID`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID`
+INNER JOIN `E` ON `F`.`E_ID` = `E`.`ID`
+INNER JOIN `C` ON `E`.`C_ID` = `C`.`ID` AND `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `D` ON `F`.`d_id` = `D`.`id`
+INNER JOIN `B` ON `D`.`b_id` = `B`.`id`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id`
+INNER JOIN `E` ON `F`.`e_id` = `E`.`id`
+INNER JOIN `C` ON `E`.`c_id` = `C`.`id` AND `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0])
+  LogicalJoin(condition=[AND(=($15, $17), =($18, $11))], joinType=[inner])
+    LogicalJoin(condition=[=($2, $13)], joinType=[inner])
+      LogicalJoin(condition=[=($9, $11)], joinType=[inner])
+        LogicalJoin(condition=[=($5, $8)], joinType=[inner])
+          LogicalJoin(condition=[=($1, $4)], joinType=[inner])
+            LogicalTableScan(table=[[F]])
+            LogicalTableScan(table=[[D]])
+          LogicalTableScan(table=[[B]])
+        LogicalTableScan(table=[[A]])
+      LogicalTableScan(table=[[E]])
+    LogicalTableScan(table=[[C]])
+
+
+[Physical plan]
+BindableProject(ID=[$0]), id = 104899
+  BindableJoin(condition=[AND(=($15, $17), =($18, $11))], joinType=[inner]), id = 104898
+    BindableJoin(condition=[=($2, $13)], joinType=[inner]), id = 104897
+      BindableJoin(condition=[=($9, $11)], joinType=[inner]), id = 104896
+        BindableJoin(condition=[=($5, $8)], joinType=[inner]), id = 104895
+          BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 104894
+            BindableTableScan(table=[[F]]), id = 87903
+            BindableTableScan(table=[[D]]), id = 87907
+          BindableTableScan(table=[[B]]), id = 87919
+        BindableTableScan(table=[[A]]), id = 87939
+      BindableTableScan(table=[[E]]), id = 87959
+    BindableTableScan(table=[[C]]), id = 87979
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT A.id, SUM(F.value_f) FROM A JOIN B ON A.id = B.a_id JOIN C ON A.id = C.a_id JOIN D ON B.id = D.b_id JOIN E ON C.id = E.c_id JOIN F ON D.id = F.d_id AND E.id = F.e_id GROUP BY A.id
+
+[SqlNode]
+SELECT `A`.`ID`, SUM(`F`.`VALUE_F`)
+FROM `A`
+INNER JOIN `B` ON `A`.`ID` = `B`.`A_ID`
+INNER JOIN `C` ON `A`.`ID` = `C`.`A_ID`
+INNER JOIN `D` ON `B`.`ID` = `D`.`B_ID`
+INNER JOIN `E` ON `C`.`ID` = `E`.`C_ID`
+INNER JOIN `F` ON `D`.`ID` = `F`.`D_ID` AND `E`.`ID` = `F`.`E_ID`
+GROUP BY `A`.`ID`
+
+[Valid SqlNode]
+SELECT `A`.`ID`, SUM(`F`.`VALUE_F`)
+FROM `A`
+INNER JOIN `B` ON `A`.`id` = `B`.`a_id`
+INNER JOIN `C` ON `A`.`id` = `C`.`a_id`
+INNER JOIN `D` ON `B`.`id` = `D`.`b_id`
+INNER JOIN `E` ON `C`.`id` = `E`.`c_id`
+INNER JOIN `F` ON `D`.`id` = `F`.`d_id` AND `E`.`id` = `F`.`e_id`
+GROUP BY `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0], EXPR$1=[$1])
+  LogicalAggregate(group=[{0}], EXPR$1=[SUM($1)])
+    LogicalProject(id=[$0], value_f=[$19])
+      LogicalJoin(condition=[AND(=($8, $17), =($12, $18))], joinType=[inner])
+        LogicalJoin(condition=[=($5, $14)], joinType=[inner])
+          LogicalJoin(condition=[=($2, $9)], joinType=[inner])
+            LogicalJoin(condition=[=($0, $6)], joinType=[inner])
+              LogicalJoin(condition=[=($0, $3)], joinType=[inner])
+                LogicalTableScan(table=[[A]])
+                LogicalTableScan(table=[[B]])
+              LogicalTableScan(table=[[C]])
+            LogicalTableScan(table=[[D]])
+          LogicalTableScan(table=[[E]])
+        LogicalTableScan(table=[[F]])
+
+
+[Physical plan]
+BindableProject(ID=[$0], EXPR$1=[$1]), id = 121961
+  BindableAggregate(group=[{0}], EXPR$1=[SUM($1)]), id = 121960
+    BindableProject(id=[$0], value_f=[$19]), id = 121959
+      BindableJoin(condition=[AND(=($8, $17), =($12, $18))], joinType=[inner]), id = 121958
+        BindableJoin(condition=[=($5, $14)], joinType=[inner]), id = 121957
+          BindableJoin(condition=[=($2, $9)], joinType=[inner]), id = 121956
+            BindableJoin(condition=[=($0, $6)], joinType=[inner]), id = 121955
+              BindableJoin(condition=[=($0, $3)], joinType=[inner]), id = 121954
+                BindableTableScan(table=[[A]]), id = 104955
+                BindableTableScan(table=[[B]]), id = 104959
+              BindableTableScan(table=[[C]]), id = 104971
+            BindableTableScan(table=[[D]]), id = 104991
+          BindableTableScan(table=[[E]]), id = 105011
+        BindableTableScan(table=[[F]]), id = 105031
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT F.id FROM F JOIN D ON F.d_id = D.id JOIN E ON F.e_id = E.id JOIN B B1 ON D.b_id = B1.id JOIN C C1 ON D.c_id = C1.id JOIN B B2 ON E.b_id = B2.id JOIN C C2 ON E.c_id = C2.id WHERE B1.a_id = C1.a_id AND B2.a_id = C2.a_id
+
+[SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `D` ON `F`.`D_ID` = `D`.`ID`
+INNER JOIN `E` ON `F`.`E_ID` = `E`.`ID`
+INNER JOIN `B` AS `B1` ON `D`.`B_ID` = `B1`.`ID`
+INNER JOIN `C` AS `C1` ON `D`.`C_ID` = `C1`.`ID`
+INNER JOIN `B` AS `B2` ON `E`.`B_ID` = `B2`.`ID`
+INNER JOIN `C` AS `C2` ON `E`.`C_ID` = `C2`.`ID`
+WHERE `B1`.`A_ID` = `C1`.`A_ID` AND `B2`.`A_ID` = `C2`.`A_ID`
+
+[Valid SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `D` ON `F`.`d_id` = `D`.`id`
+INNER JOIN `E` ON `F`.`e_id` = `E`.`id`
+INNER JOIN `B` AS `B1` ON `D`.`b_id` = `B1`.`id`
+INNER JOIN `C` AS `C1` ON `D`.`c_id` = `C1`.`id`
+INNER JOIN `B` AS `B2` ON `E`.`b_id` = `B2`.`id`
+INNER JOIN `C` AS `C2` ON `E`.`c_id` = `C2`.`id`
+WHERE `B1`.`a_id` = `C1`.`a_id` AND `B2`.`a_id` = `C2`.`a_id`
+
+[Logical plan]
+LogicalProject(ID=[$0])
+  LogicalFilter(condition=[AND(=($13, $16), =($19, $22))])
+    LogicalJoin(condition=[=($10, $21)], joinType=[inner])
+      LogicalJoin(condition=[=($9, $18)], joinType=[inner])
+        LogicalJoin(condition=[=($6, $15)], joinType=[inner])
+          LogicalJoin(condition=[=($5, $12)], joinType=[inner])
+            LogicalJoin(condition=[=($2, $8)], joinType=[inner])
+              LogicalJoin(condition=[=($1, $4)], joinType=[inner])
+                LogicalTableScan(table=[[F]])
+                LogicalTableScan(table=[[D]])
+              LogicalTableScan(table=[[E]])
+            LogicalTableScan(table=[[B]])
+          LogicalTableScan(table=[[C]])
+        LogicalTableScan(table=[[B]])
+      LogicalTableScan(table=[[C]])
+
+
+[Physical plan]
+BindableProject(ID=[$0]), id = 126293
+  BindableJoin(condition=[AND(=($10, $21), =($19, $22))], joinType=[inner]), id = 126292
+    BindableJoin(condition=[=($9, $18)], joinType=[inner]), id = 126291
+      BindableJoin(condition=[AND(=($6, $15), =($13, $16))], joinType=[inner]), id = 126290
+        BindableJoin(condition=[=($5, $12)], joinType=[inner]), id = 126289
+          BindableJoin(condition=[=($2, $8)], joinType=[inner]), id = 126288
+            BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 126287
+              BindableTableScan(table=[[F]]), id = 122017
+              BindableTableScan(table=[[D]]), id = 122021
+            BindableTableScan(table=[[E]]), id = 122033
+          BindableTableScan(table=[[B]]), id = 122053
+        BindableTableScan(table=[[C]]), id = 122073
+      BindableTableScan(table=[[B]]), id = 122053
+    BindableTableScan(table=[[C]]), id = 122073
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT COUNT(*) FROM F JOIN D ON F.d_id = D.id JOIN B ON D.b_id = B.id JOIN C ON D.c_id = C.id JOIN A ON B.a_id = A.id WHERE C.a_id = A.id
+
+[SqlNode]
+SELECT COUNT(*)
+FROM `F`
+INNER JOIN `D` ON `F`.`D_ID` = `D`.`ID`
+INNER JOIN `B` ON `D`.`B_ID` = `B`.`ID`
+INNER JOIN `C` ON `D`.`C_ID` = `C`.`ID`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID`
+WHERE `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT COUNT(*)
+FROM `F`
+INNER JOIN `D` ON `F`.`d_id` = `D`.`id`
+INNER JOIN `B` ON `D`.`b_id` = `B`.`id`
+INNER JOIN `C` ON `D`.`c_id` = `C`.`id`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id`
+WHERE `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalFilter(condition=[=($12, $14)])
+    LogicalJoin(condition=[=($9, $14)], joinType=[inner])
+      LogicalJoin(condition=[=($6, $11)], joinType=[inner])
+        LogicalJoin(condition=[=($5, $8)], joinType=[inner])
+          LogicalJoin(condition=[=($1, $4)], joinType=[inner])
+            LogicalTableScan(table=[[F]])
+            LogicalTableScan(table=[[D]])
+          LogicalTableScan(table=[[B]])
+        LogicalTableScan(table=[[C]])
+      LogicalTableScan(table=[[A]])
+
+
+[Physical plan]
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 127567
+  BindableJoin(condition=[=($9, $14)], joinType=[inner]), id = 127566
+    BindableJoin(condition=[AND(=($6, $11), =($9, $12))], joinType=[inner]), id = 127565
+      BindableJoin(condition=[=($5, $8)], joinType=[inner]), id = 127564
+        BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 127563
+          BindableTableScan(table=[[F]]), id = 126337
+          BindableTableScan(table=[[D]]), id = 126341
+        BindableTableScan(table=[[B]]), id = 126353
+      BindableTableScan(table=[[C]]), id = 126373
+    BindableTableScan(table=[[A]]), id = 126393
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT E.id FROM E JOIN C ON E.c_id = C.id JOIN B ON E.b_id = B.id JOIN A ON B.a_id = A.id WHERE C.a_id = A.id
+
+[SqlNode]
+SELECT `E`.`ID`
+FROM `E`
+INNER JOIN `C` ON `E`.`C_ID` = `C`.`ID`
+INNER JOIN `B` ON `E`.`B_ID` = `B`.`ID`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID`
+WHERE `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT `E`.`ID`
+FROM `E`
+INNER JOIN `C` ON `E`.`c_id` = `C`.`id`
+INNER JOIN `B` ON `E`.`b_id` = `B`.`id`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id`
+WHERE `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0])
+  LogicalFilter(condition=[=($5, $10)])
+    LogicalJoin(condition=[=($8, $10)], joinType=[inner])
+      LogicalJoin(condition=[=($1, $7)], joinType=[inner])
+        LogicalJoin(condition=[=($2, $4)], joinType=[inner])
+          LogicalTableScan(table=[[E]])
+          LogicalTableScan(table=[[C]])
+        LogicalTableScan(table=[[B]])
+      LogicalTableScan(table=[[A]])
+
+
+[Physical plan]
+BindableProject(ID=[$0]), id = 128622
+  BindableJoin(condition=[=($8, $10)], joinType=[inner]), id = 128621
+    BindableJoin(condition=[AND(=($1, $7), =($8, $5))], joinType=[inner]), id = 128620
+      BindableJoin(condition=[=($2, $4)], joinType=[inner]), id = 128619
+        BindableTableScan(table=[[E]]), id = 127604
+        BindableTableScan(table=[[C]]), id = 127608
+      BindableTableScan(table=[[B]]), id = 127620
+    BindableTableScan(table=[[A]]), id = 127640
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT F.id, A.id FROM F JOIN E ON F.e_id = E.id JOIN D ON F.d_id = D.id JOIN B ON E.b_id = B.id JOIN C ON D.c_id = C.id JOIN A ON B.a_id = A.id AND C.a_id = A.id
+
+[SqlNode]
+SELECT `F`.`ID`, `A`.`ID`
+FROM `F`
+INNER JOIN `E` ON `F`.`E_ID` = `E`.`ID`
+INNER JOIN `D` ON `F`.`D_ID` = `D`.`ID`
+INNER JOIN `B` ON `E`.`B_ID` = `B`.`ID`
+INNER JOIN `C` ON `D`.`C_ID` = `C`.`ID`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID` AND `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT `F`.`ID`, `A`.`ID`
+FROM `F`
+INNER JOIN `E` ON `F`.`e_id` = `E`.`id`
+INNER JOIN `D` ON `F`.`d_id` = `D`.`id`
+INNER JOIN `B` ON `E`.`b_id` = `B`.`id`
+INNER JOIN `C` ON `D`.`c_id` = `C`.`id`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id` AND `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0], ID0=[$18])
+  LogicalJoin(condition=[AND(=($13, $18), =($16, $18))], joinType=[inner])
+    LogicalJoin(condition=[=($10, $15)], joinType=[inner])
+      LogicalJoin(condition=[=($5, $12)], joinType=[inner])
+        LogicalJoin(condition=[=($1, $8)], joinType=[inner])
+          LogicalJoin(condition=[=($2, $4)], joinType=[inner])
+            LogicalTableScan(table=[[F]])
+            LogicalTableScan(table=[[E]])
+          LogicalTableScan(table=[[D]])
+        LogicalTableScan(table=[[B]])
+      LogicalTableScan(table=[[C]])
+    LogicalTableScan(table=[[A]])
+
+
+[Physical plan]
+BindableProject(ID=[$0], ID0=[$18]), id = 145666
+  BindableJoin(condition=[AND(=($13, $18), =($16, $18))], joinType=[inner]), id = 145665
+    BindableJoin(condition=[=($10, $15)], joinType=[inner]), id = 145664
+      BindableJoin(condition=[=($5, $12)], joinType=[inner]), id = 145663
+        BindableJoin(condition=[=($1, $8)], joinType=[inner]), id = 145662
+          BindableJoin(condition=[=($2, $4)], joinType=[inner]), id = 145661
+            BindableTableScan(table=[[F]]), id = 128670
+            BindableTableScan(table=[[E]]), id = 128674
+          BindableTableScan(table=[[D]]), id = 128686
+        BindableTableScan(table=[[B]]), id = 128706
+      BindableTableScan(table=[[C]]), id = 128726
+    BindableTableScan(table=[[A]]), id = 128746
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT DISTINCT A.id FROM A JOIN B ON A.id = B.a_id JOIN C ON A.id = C.a_id JOIN D ON B.id = D.b_id JOIN E ON C.id = E.c_id JOIN F ON D.id = F.d_id AND E.id = F.e_id
+
+[SqlNode]
+SELECT DISTINCT `A`.`ID`
+FROM `A`
+INNER JOIN `B` ON `A`.`ID` = `B`.`A_ID`
+INNER JOIN `C` ON `A`.`ID` = `C`.`A_ID`
+INNER JOIN `D` ON `B`.`ID` = `D`.`B_ID`
+INNER JOIN `E` ON `C`.`ID` = `E`.`C_ID`
+INNER JOIN `F` ON `D`.`ID` = `F`.`D_ID` AND `E`.`ID` = `F`.`E_ID`
+
+[Valid SqlNode]
+SELECT DISTINCT `A`.`ID`
+FROM `A`
+INNER JOIN `B` ON `A`.`id` = `B`.`a_id`
+INNER JOIN `C` ON `A`.`id` = `C`.`a_id`
+INNER JOIN `D` ON `B`.`id` = `D`.`b_id`
+INNER JOIN `E` ON `C`.`id` = `E`.`c_id`
+INNER JOIN `F` ON `D`.`id` = `F`.`d_id` AND `E`.`id` = `F`.`e_id`
+
+[Logical plan]
+LogicalAggregate(group=[{0}])
+  LogicalProject(ID=[$0])
+    LogicalJoin(condition=[AND(=($8, $17), =($12, $18))], joinType=[inner])
+      LogicalJoin(condition=[=($5, $14)], joinType=[inner])
+        LogicalJoin(condition=[=($2, $9)], joinType=[inner])
+          LogicalJoin(condition=[=($0, $6)], joinType=[inner])
+            LogicalJoin(condition=[=($0, $3)], joinType=[inner])
+              LogicalTableScan(table=[[A]])
+              LogicalTableScan(table=[[B]])
+            LogicalTableScan(table=[[C]])
+          LogicalTableScan(table=[[D]])
+        LogicalTableScan(table=[[E]])
+      LogicalTableScan(table=[[F]])
+
+
+[Physical plan]
+BindableAggregate(group=[{0}]), id = 162719
+  BindableProject(ID=[$0]), id = 162718
+    BindableJoin(condition=[AND(=($8, $17), =($12, $18))], joinType=[inner]), id = 162717
+      BindableJoin(condition=[=($5, $14)], joinType=[inner]), id = 162716
+        BindableJoin(condition=[=($2, $9)], joinType=[inner]), id = 162715
+          BindableJoin(condition=[=($0, $6)], joinType=[inner]), id = 162714
+            BindableJoin(condition=[=($0, $3)], joinType=[inner]), id = 162713
+              BindableTableScan(table=[[A]]), id = 145718
+              BindableTableScan(table=[[B]]), id = 145722
+            BindableTableScan(table=[[C]]), id = 145734
+          BindableTableScan(table=[[D]]), id = 145754
+        BindableTableScan(table=[[E]]), id = 145774
+      BindableTableScan(table=[[F]]), id = 145794
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT A.id, F.value_f FROM A JOIN B ON A.id = B.a_id JOIN C ON A.id = C.a_id JOIN D ON B.id = D.b_id JOIN E ON C.id = E.c_id JOIN F ON D.id = F.d_id AND E.id = F.e_id
+
+[SqlNode]
+SELECT `A`.`ID`, `F`.`VALUE_F`
+FROM `A`
+INNER JOIN `B` ON `A`.`ID` = `B`.`A_ID`
+INNER JOIN `C` ON `A`.`ID` = `C`.`A_ID`
+INNER JOIN `D` ON `B`.`ID` = `D`.`B_ID`
+INNER JOIN `E` ON `C`.`ID` = `E`.`C_ID`
+INNER JOIN `F` ON `D`.`ID` = `F`.`D_ID` AND `E`.`ID` = `F`.`E_ID`
+
+[Valid SqlNode]
+SELECT `A`.`ID`, `F`.`VALUE_F`
+FROM `A`
+INNER JOIN `B` ON `A`.`id` = `B`.`a_id`
+INNER JOIN `C` ON `A`.`id` = `C`.`a_id`
+INNER JOIN `D` ON `B`.`id` = `D`.`b_id`
+INNER JOIN `E` ON `C`.`id` = `E`.`c_id`
+INNER JOIN `F` ON `D`.`id` = `F`.`d_id` AND `E`.`id` = `F`.`e_id`
+
+[Logical plan]
+LogicalProject(ID=[$0], VALUE_F=[$19])
+  LogicalJoin(condition=[AND(=($8, $17), =($12, $18))], joinType=[inner])
+    LogicalJoin(condition=[=($5, $14)], joinType=[inner])
+      LogicalJoin(condition=[=($2, $9)], joinType=[inner])
+        LogicalJoin(condition=[=($0, $6)], joinType=[inner])
+          LogicalJoin(condition=[=($0, $3)], joinType=[inner])
+            LogicalTableScan(table=[[A]])
+            LogicalTableScan(table=[[B]])
+          LogicalTableScan(table=[[C]])
+        LogicalTableScan(table=[[D]])
+      LogicalTableScan(table=[[E]])
+    LogicalTableScan(table=[[F]])
+
+
+[Physical plan]
+BindableProject(ID=[$0], VALUE_F=[$19]), id = 179763
+  BindableJoin(condition=[AND(=($8, $17), =($12, $18))], joinType=[inner]), id = 179762
+    BindableJoin(condition=[=($5, $14)], joinType=[inner]), id = 179761
+      BindableJoin(condition=[=($2, $9)], joinType=[inner]), id = 179760
+        BindableJoin(condition=[=($0, $6)], joinType=[inner]), id = 179759
+          BindableJoin(condition=[=($0, $3)], joinType=[inner]), id = 179758
+            BindableTableScan(table=[[A]]), id = 162767
+            BindableTableScan(table=[[B]]), id = 162771
+          BindableTableScan(table=[[C]]), id = 162783
+        BindableTableScan(table=[[D]]), id = 162803
+      BindableTableScan(table=[[E]]), id = 162823
+    BindableTableScan(table=[[F]]), id = 162843
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT COUNT(*) FROM D JOIN B ON D.b_id = B.id JOIN C ON D.c_id = C.id JOIN A ON B.a_id = A.id AND C.a_id = A.id
+
+[SqlNode]
+SELECT COUNT(*)
+FROM `D`
+INNER JOIN `B` ON `D`.`B_ID` = `B`.`ID`
+INNER JOIN `C` ON `D`.`C_ID` = `C`.`ID`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID` AND `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT COUNT(*)
+FROM `D`
+INNER JOIN `B` ON `D`.`b_id` = `B`.`id`
+INNER JOIN `C` ON `D`.`c_id` = `C`.`id`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id` AND `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalJoin(condition=[AND(=($5, $10), =($8, $10))], joinType=[inner])
+    LogicalJoin(condition=[=($2, $7)], joinType=[inner])
+      LogicalJoin(condition=[=($1, $4)], joinType=[inner])
+        LogicalTableScan(table=[[D]])
+        LogicalTableScan(table=[[B]])
+      LogicalTableScan(table=[[C]])
+    LogicalTableScan(table=[[A]])
+
+
+[Physical plan]
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 181365
+  BindableJoin(condition=[AND(=($5, $10), =($8, $10))], joinType=[inner]), id = 181364
+    BindableJoin(condition=[=($2, $7)], joinType=[inner]), id = 181363
+      BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 181362
+        BindableTableScan(table=[[D]]), id = 179797
+        BindableTableScan(table=[[B]]), id = 179801
+      BindableTableScan(table=[[C]]), id = 179813
+    BindableTableScan(table=[[A]]), id = 179833
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT COUNT(*) FROM F JOIN E ON F.e_id = E.id JOIN C ON E.c_id = C.id JOIN A ON C.a_id = A.id
+
+[SqlNode]
+SELECT COUNT(*)
+FROM `F`
+INNER JOIN `E` ON `F`.`E_ID` = `E`.`ID`
+INNER JOIN `C` ON `E`.`C_ID` = `C`.`ID`
+INNER JOIN `A` ON `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT COUNT(*)
+FROM `F`
+INNER JOIN `E` ON `F`.`e_id` = `E`.`id`
+INNER JOIN `C` ON `E`.`c_id` = `C`.`id`
+INNER JOIN `A` ON `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalJoin(condition=[=($9, $11)], joinType=[inner])
+    LogicalJoin(condition=[=($6, $8)], joinType=[inner])
+      LogicalJoin(condition=[=($2, $4)], joinType=[inner])
+        LogicalTableScan(table=[[F]])
+        LogicalTableScan(table=[[E]])
+      LogicalTableScan(table=[[C]])
+    LogicalTableScan(table=[[A]])
+
+
+[Physical plan]
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 181719
+  BindableJoin(condition=[=($9, $11)], joinType=[inner]), id = 181718
+    BindableJoin(condition=[=($6, $8)], joinType=[inner]), id = 181717
+      BindableJoin(condition=[=($2, $4)], joinType=[inner]), id = 181716
+        BindableTableScan(table=[[F]]), id = 181399
+        BindableTableScan(table=[[E]]), id = 181403
+      BindableTableScan(table=[[C]]), id = 181415
+    BindableTableScan(table=[[A]]), id = 181435
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT B.id FROM B JOIN A ON B.a_id = A.id JOIN C ON C.a_id = A.id JOIN D ON B.id = D.b_id JOIN E ON C.id = E.c_id JOIN F ON D.id = F.d_id AND E.id = F.e_id
+
+[SqlNode]
+SELECT `B`.`ID`
+FROM `B`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID`
+INNER JOIN `C` ON `C`.`A_ID` = `A`.`ID`
+INNER JOIN `D` ON `B`.`ID` = `D`.`B_ID`
+INNER JOIN `E` ON `C`.`ID` = `E`.`C_ID`
+INNER JOIN `F` ON `D`.`ID` = `F`.`D_ID` AND `E`.`ID` = `F`.`E_ID`
+
+[Valid SqlNode]
+SELECT `B`.`ID`
+FROM `B`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id`
+INNER JOIN `C` ON `C`.`a_id` = `A`.`id`
+INNER JOIN `D` ON `B`.`id` = `D`.`b_id`
+INNER JOIN `E` ON `C`.`id` = `E`.`c_id`
+INNER JOIN `F` ON `D`.`id` = `F`.`d_id` AND `E`.`id` = `F`.`e_id`
+
+[Logical plan]
+LogicalProject(ID=[$0])
+  LogicalJoin(condition=[AND(=($8, $17), =($12, $18))], joinType=[inner])
+    LogicalJoin(condition=[=($5, $14)], joinType=[inner])
+      LogicalJoin(condition=[=($0, $9)], joinType=[inner])
+        LogicalJoin(condition=[=($6, $3)], joinType=[inner])
+          LogicalJoin(condition=[=($1, $3)], joinType=[inner])
+            LogicalTableScan(table=[[B]])
+            LogicalTableScan(table=[[A]])
+          LogicalTableScan(table=[[C]])
+        LogicalTableScan(table=[[D]])
+      LogicalTableScan(table=[[E]])
+    LogicalTableScan(table=[[F]])
+
+
+[Physical plan]
+BindableProject(ID=[$0]), id = 198763
+  BindableJoin(condition=[AND(=($8, $17), =($12, $18))], joinType=[inner]), id = 198762
+    BindableJoin(condition=[=($5, $14)], joinType=[inner]), id = 198761
+      BindableJoin(condition=[=($0, $9)], joinType=[inner]), id = 198760
+        BindableJoin(condition=[=($6, $3)], joinType=[inner]), id = 198759
+          BindableJoin(condition=[=($1, $3)], joinType=[inner]), id = 198758
+            BindableTableScan(table=[[B]]), id = 181767
+            BindableTableScan(table=[[A]]), id = 181771
+          BindableTableScan(table=[[C]]), id = 181783
+        BindableTableScan(table=[[D]]), id = 181803
+      BindableTableScan(table=[[E]]), id = 181823
+    BindableTableScan(table=[[F]]), id = 181843
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT A.id FROM A JOIN B ON A.id = B.a_id JOIN D ON B.id = D.b_id JOIN F ON D.id = F.d_id JOIN E ON F.e_id = E.id JOIN C ON E.c_id = C.id WHERE C.a_id = A.id
+
+[SqlNode]
+SELECT `A`.`ID`
+FROM `A`
+INNER JOIN `B` ON `A`.`ID` = `B`.`A_ID`
+INNER JOIN `D` ON `B`.`ID` = `D`.`B_ID`
+INNER JOIN `F` ON `D`.`ID` = `F`.`D_ID`
+INNER JOIN `E` ON `F`.`E_ID` = `E`.`ID`
+INNER JOIN `C` ON `E`.`C_ID` = `C`.`ID`
+WHERE `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT `A`.`ID`
+FROM `A`
+INNER JOIN `B` ON `A`.`id` = `B`.`a_id`
+INNER JOIN `D` ON `B`.`id` = `D`.`b_id`
+INNER JOIN `F` ON `D`.`id` = `F`.`d_id`
+INNER JOIN `E` ON `F`.`e_id` = `E`.`id`
+INNER JOIN `C` ON `E`.`c_id` = `C`.`id`
+WHERE `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0])
+  LogicalFilter(condition=[=($18, $0)])
+    LogicalJoin(condition=[=($15, $17)], joinType=[inner])
+      LogicalJoin(condition=[=($11, $13)], joinType=[inner])
+        LogicalJoin(condition=[=($5, $10)], joinType=[inner])
+          LogicalJoin(condition=[=($2, $6)], joinType=[inner])
+            LogicalJoin(condition=[=($0, $3)], joinType=[inner])
+              LogicalTableScan(table=[[A]])
+              LogicalTableScan(table=[[B]])
+            LogicalTableScan(table=[[D]])
+          LogicalTableScan(table=[[F]])
+        LogicalTableScan(table=[[E]])
+      LogicalTableScan(table=[[C]])
+
+
+[Physical plan]
+BindableProject(ID=[$0]), id = 216056
+  BindableJoin(condition=[AND(=($15, $17), =($18, $0))], joinType=[inner]), id = 216055
+    BindableJoin(condition=[=($11, $13)], joinType=[inner]), id = 216054
+      BindableJoin(condition=[=($5, $10)], joinType=[inner]), id = 216053
+        BindableJoin(condition=[=($2, $6)], joinType=[inner]), id = 216052
+          BindableJoin(condition=[=($0, $3)], joinType=[inner]), id = 216051
+            BindableTableScan(table=[[A]]), id = 198814
+            BindableTableScan(table=[[B]]), id = 198818
+          BindableTableScan(table=[[D]]), id = 198830
+        BindableTableScan(table=[[F]]), id = 198850
+      BindableTableScan(table=[[E]]), id = 198870
+    BindableTableScan(table=[[C]]), id = 198890
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT A.id FROM A JOIN C ON A.id = C.a_id JOIN E ON C.id = E.c_id JOIN F ON E.id = F.e_id JOIN D ON F.d_id = D.id JOIN B ON D.b_id = B.id WHERE B.a_id = A.id
+
+[SqlNode]
+SELECT `A`.`ID`
+FROM `A`
+INNER JOIN `C` ON `A`.`ID` = `C`.`A_ID`
+INNER JOIN `E` ON `C`.`ID` = `E`.`C_ID`
+INNER JOIN `F` ON `E`.`ID` = `F`.`E_ID`
+INNER JOIN `D` ON `F`.`D_ID` = `D`.`ID`
+INNER JOIN `B` ON `D`.`B_ID` = `B`.`ID`
+WHERE `B`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT `A`.`ID`
+FROM `A`
+INNER JOIN `C` ON `A`.`id` = `C`.`a_id`
+INNER JOIN `E` ON `C`.`id` = `E`.`c_id`
+INNER JOIN `F` ON `E`.`id` = `F`.`e_id`
+INNER JOIN `D` ON `F`.`d_id` = `D`.`id`
+INNER JOIN `B` ON `D`.`b_id` = `B`.`id`
+WHERE `B`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0])
+  LogicalFilter(condition=[=($18, $0)])
+    LogicalJoin(condition=[=($14, $17)], joinType=[inner])
+      LogicalJoin(condition=[=($10, $13)], joinType=[inner])
+        LogicalJoin(condition=[=($5, $11)], joinType=[inner])
+          LogicalJoin(condition=[=($2, $7)], joinType=[inner])
+            LogicalJoin(condition=[=($0, $3)], joinType=[inner])
+              LogicalTableScan(table=[[A]])
+              LogicalTableScan(table=[[C]])
+            LogicalTableScan(table=[[E]])
+          LogicalTableScan(table=[[F]])
+        LogicalTableScan(table=[[D]])
+      LogicalTableScan(table=[[B]])
+
+
+[Physical plan]
+BindableProject(ID=[$0]), id = 233349
+  BindableJoin(condition=[AND(=($14, $17), =($18, $0))], joinType=[inner]), id = 233348
+    BindableJoin(condition=[=($10, $13)], joinType=[inner]), id = 233347
+      BindableJoin(condition=[=($5, $11)], joinType=[inner]), id = 233346
+        BindableJoin(condition=[=($2, $7)], joinType=[inner]), id = 233345
+          BindableJoin(condition=[=($0, $3)], joinType=[inner]), id = 233344
+            BindableTableScan(table=[[A]]), id = 216107
+            BindableTableScan(table=[[C]]), id = 216111
+          BindableTableScan(table=[[E]]), id = 216123
+        BindableTableScan(table=[[F]]), id = 216143
+      BindableTableScan(table=[[D]]), id = 216163
+    BindableTableScan(table=[[B]]), id = 216183
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT F.id FROM F JOIN D ON F.d_id = D.id JOIN E ON F.e_id = E.id JOIN B ON D.b_id = B.id AND E.b_id = B.id JOIN C ON D.c_id = C.id AND E.c_id = C.id JOIN A ON B.a_id = A.id AND C.a_id = A.id
+
+[SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `D` ON `F`.`D_ID` = `D`.`ID`
+INNER JOIN `E` ON `F`.`E_ID` = `E`.`ID`
+INNER JOIN `B` ON `D`.`B_ID` = `B`.`ID` AND `E`.`B_ID` = `B`.`ID`
+INNER JOIN `C` ON `D`.`C_ID` = `C`.`ID` AND `E`.`C_ID` = `C`.`ID`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID` AND `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `D` ON `F`.`d_id` = `D`.`id`
+INNER JOIN `E` ON `F`.`e_id` = `E`.`id`
+INNER JOIN `B` ON `D`.`b_id` = `B`.`id` AND `E`.`b_id` = `B`.`id`
+INNER JOIN `C` ON `D`.`c_id` = `C`.`id` AND `E`.`c_id` = `C`.`id`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id` AND `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0])
+  LogicalJoin(condition=[AND(=($13, $18), =($16, $18))], joinType=[inner])
+    LogicalJoin(condition=[AND(=($6, $15), =($10, $15))], joinType=[inner])
+      LogicalJoin(condition=[AND(=($5, $12), =($9, $12))], joinType=[inner])
+        LogicalJoin(condition=[=($2, $8)], joinType=[inner])
+          LogicalJoin(condition=[=($1, $4)], joinType=[inner])
+            LogicalTableScan(table=[[F]])
+            LogicalTableScan(table=[[D]])
+          LogicalTableScan(table=[[E]])
+        LogicalTableScan(table=[[B]])
+      LogicalTableScan(table=[[C]])
+    LogicalTableScan(table=[[A]])
+
+
+[Physical plan]
+BindableProject(ID=[$0]), id = 278213
+  BindableJoin(condition=[AND(=($13, $18), =($16, $18))], joinType=[inner]), id = 278212
+    BindableJoin(condition=[AND(=($6, $15), =($10, $15))], joinType=[inner]), id = 278211
+      BindableJoin(condition=[AND(=($5, $12), =($9, $12))], joinType=[inner]), id = 278210
+        BindableJoin(condition=[=($2, $8)], joinType=[inner]), id = 278209
+          BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 278208
+            BindableTableScan(table=[[F]]), id = 233397
+            BindableTableScan(table=[[D]]), id = 233401
+          BindableTableScan(table=[[E]]), id = 233413
+        BindableTableScan(table=[[B]]), id = 233433
+      BindableTableScan(table=[[C]]), id = 233461
+    BindableTableScan(table=[[A]]), id = 233481
+
+
+------------------------------------------------------------------------------------------------------------------
+20 out of 20 queries successful

@@ -1,0 +1,51 @@
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT F.id FROM F JOIN D ON F.d_id = D.id JOIN E ON F.e_id = E.id JOIN C ON D.c_id = C.id JOIN B ON E.b_id = B.id JOIN A ON B.a_id = A.id AND C.a_id = A.id
+
+[SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `D` ON `F`.`D_ID` = `D`.`ID`
+INNER JOIN `E` ON `F`.`E_ID` = `E`.`ID`
+INNER JOIN `C` ON `D`.`C_ID` = `C`.`ID`
+INNER JOIN `B` ON `E`.`B_ID` = `B`.`ID`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID` AND `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `D` ON `F`.`d_id` = `D`.`id`
+INNER JOIN `E` ON `F`.`e_id` = `E`.`id`
+INNER JOIN `C` ON `D`.`c_id` = `C`.`id`
+INNER JOIN `B` ON `E`.`b_id` = `B`.`id`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id` AND `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0])
+  LogicalJoin(condition=[AND(=($16, $18), =($13, $18))], joinType=[inner])
+    LogicalJoin(condition=[=($9, $15)], joinType=[inner])
+      LogicalJoin(condition=[=($6, $12)], joinType=[inner])
+        LogicalJoin(condition=[=($2, $8)], joinType=[inner])
+          LogicalJoin(condition=[=($1, $4)], joinType=[inner])
+            LogicalTableScan(table=[[F]])
+            LogicalTableScan(table=[[D]])
+          LogicalTableScan(table=[[E]])
+        LogicalTableScan(table=[[C]])
+      LogicalTableScan(table=[[B]])
+    LogicalTableScan(table=[[A]])
+
+
+[Physical plan]
+BindableProject(ID=[$0], VALUE_A=[$19]), id = 5681
+  BindableJoin(condition=[AND(=($13, $18), =($16, $18))], joinType=[inner]), id = 5680
+    BindableJoin(condition=[=($6, $15)], joinType=[inner]), id = 5679
+      BindableJoin(condition=[=($5, $12)], joinType=[inner]), id = 5678
+        BindableJoin(condition=[=($2, $8)], joinType=[inner]), id = 5677
+          BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 5676
+            BindableTableScan(table=[[F]]), id = 47
+            BindableTableScan(table=[[D]]), id = 51
+          BindableTableScan(table=[[E]]), id = 63
+        BindableTableScan(table=[[B]]), id = 83
+      BindableTableScan(table=[[C]]), id = 103
+    BindableTableScan(table=[[A]]), id = 123
+

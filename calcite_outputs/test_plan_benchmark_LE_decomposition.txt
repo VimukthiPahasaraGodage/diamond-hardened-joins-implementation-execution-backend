@@ -1,0 +1,55 @@
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT F.id FROM F JOIN D ON F.d_id = D.id JOIN E ON F.e_id = E.id JOIN C ON D.c_id = C.id JOIN B ON E.b_id = B.id JOIN A ON B.a_id = A.id AND C.a_id = A.id
+
+[SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `D` ON `F`.`D_ID` = `D`.`ID`
+INNER JOIN `E` ON `F`.`E_ID` = `E`.`ID`
+INNER JOIN `C` ON `D`.`C_ID` = `C`.`ID`
+INNER JOIN `B` ON `E`.`B_ID` = `B`.`ID`
+INNER JOIN `A` ON `B`.`A_ID` = `A`.`ID` AND `C`.`A_ID` = `A`.`ID`
+
+[Valid SqlNode]
+SELECT `F`.`ID`
+FROM `F`
+INNER JOIN `D` ON `F`.`d_id` = `D`.`id`
+INNER JOIN `E` ON `F`.`e_id` = `E`.`id`
+INNER JOIN `C` ON `D`.`c_id` = `C`.`id`
+INNER JOIN `B` ON `E`.`b_id` = `B`.`id`
+INNER JOIN `A` ON `B`.`a_id` = `A`.`id` AND `C`.`a_id` = `A`.`id`
+
+[Logical plan]
+LogicalProject(ID=[$0])
+  LogicalJoin(condition=[AND(=($16, $18), =($13, $18))], joinType=[inner])
+    LogicalJoin(condition=[=($9, $15)], joinType=[inner])
+      LogicalJoin(condition=[=($6, $12)], joinType=[inner])
+        LogicalJoin(condition=[=($2, $8)], joinType=[inner])
+          LogicalJoin(condition=[=($1, $4)], joinType=[inner])
+            LogicalTableScan(table=[[F]])
+            LogicalTableScan(table=[[D]])
+          LogicalTableScan(table=[[E]])
+        LogicalTableScan(table=[[C]])
+      LogicalTableScan(table=[[B]])
+    LogicalTableScan(table=[[A]])
+
+
+[Physical plan]
+BindableProject(ID=[$0]), id = 22725
+  BindableJoin(condition=[AND(=($16, $18), =($13, $18))], joinType=[inner]), id = 22724
+    BindableExpand(lookup_id=[22723], LE=[2]), id = 50003
+      BindableExpand(lookup_id=[22722], LE=[2]), id = 50002
+        BindableLookup(condition=[=($9, $15)], joinType=[inner], LE=[2]), id = 22723
+          BindableLookup(condition=[=($6, $12)], joinType=[inner], LE=[2]), id = 22722
+            BindableExpand(lookup_id=[22721], LE=[1]), id = 50001
+              BindableExpand(lookup_id=[22720], LE=[1]), id = 50000
+                BindableLookup(condition=[=($2, $8)], joinType=[inner], LE=[1]), id = 22721
+                  BindableLookup(condition=[=($1, $4)], joinType=[inner], LE=[1]), id = 22720
+                    BindableTableScan(table=[[F]]), id = 5729
+                    BindableTableScan(table=[[D]]), id = 5733
+                  BindableTableScan(table=[[E]]), id = 5745
+            BindableTableScan(table=[[C]]), id = 5765
+          BindableTableScan(table=[[B]]), id = 5785
+    BindableTableScan(table=[[A]]), id = 5805
+
