@@ -44,10 +44,25 @@ LogicalAggregate(group=[{}], UNCREDITED_VOICED_CHARACTER=[MIN($0)], RUSSIAN_MOVI
 
 
 [Physical plan]
-BindableAggregate(group=[{}], FROM_COMPANY=[MIN($0)], MOVIE_LINK_TYPE=[MIN($1)], NON_POLISH_SEQUEL_MOVIE=[MIN($2)]), id = 17028
-  BindableProject(name=[$1], link=[$13], title=[$27]), id = 17027
-    BindableJoin(condition=[=($23, $26)], joinType=[inner]), id = 17026
-      BindableValues(tuples=[[]]), id = 16975
-      BindableFilter(condition=[SEARCH($4, Sarg[[1950..2000]])]), id = 17025
-        BindableTableScan(table=[[title]]), id = 16871
+BindableAggregate(group=[{}], FROM_COMPANY=[MIN($0)], PRODUCTION_NOTE=[MIN($1)], MOVIE_BASED_ON_BOOK=[MIN($2)]), id = 74620
+  BindableProject(name=[$1], note=[$18], title=[$27]), id = 74619
+    BindableJoin(condition=[=($23, $26)], joinType=[inner]), id = 74618
+      BindableJoin(condition=[AND(=($12, $25), =($20, $23))], joinType=[inner]), id = 74616
+        BindableJoin(condition=[AND(=($21, $9), =($20, $15))], joinType=[inner]), id = 74615
+          BindableJoin(condition=[AND(=($17, $7), =($16, $0))], joinType=[inner]), id = 74614
+            BindableJoin(condition=[true], joinType=[inner]), id = 74613
+              BindableJoin(condition=[true], joinType=[inner]), id = 74612
+                BindableJoin(condition=[true], joinType=[inner]), id = 74610
+                  BindableFilter(condition=[AND(<>($2, '[pl]'), OR(LIKE($1, '20th Century Fox%'), LIKE($1, 'Twentieth Century Fox%')))]), id = 74608
+                    BindableTableScan(table=[[company_name]]), id = 17399
+                  BindableFilter(condition=[<>($1, 'production companies')]), id = 74609
+                    BindableTableScan(table=[[company_type]]), id = 17403
+                BindableFilter(condition=[SEARCH($1, Sarg['based-on-novel':VARCHAR, 'revenge':VARCHAR, 'sequel':VARCHAR]:VARCHAR)]), id = 74611
+                  BindableTableScan(table=[[keyword]]), id = 17415
+              BindableTableScan(table=[[link_type]]), id = 17427
+            BindableTableScan(table=[[movie_companies]]), id = 17439
+          BindableTableScan(table=[[movie_keyword]]), id = 17451
+        BindableTableScan(table=[[movie_link]]), id = 17463
+      BindableFilter(condition=[>($4, 1950)]), id = 74617
+        BindableTableScan(table=[[title]]), id = 17475
 
