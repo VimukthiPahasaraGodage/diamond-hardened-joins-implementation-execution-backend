@@ -2,6 +2,7 @@ from typing import List
 
 from components.code_generator_components.aggregate_condition import aggregate_condition
 from components.code_generator_components.filter_condition import filter_condition
+from components.code_generator_components.helper_functions import fill_nan_with_default_values
 from components.code_generator_components.join_algorithms.hash_join_algorithm import partitioned_hash_join_function
 from components.code_generator_components.join_algorithms.le_decomposition_join_algorithm import \
     le_decomposition_join_function
@@ -60,7 +61,8 @@ class PlanCodeGenerator:
                        aggregate_condition.splitlines(),
                        projection_condition.splitlines(),
                        join_condition.splitlines(),
-                       le_decomposition_join_function.splitlines()]
+                       le_decomposition_join_function.splitlines(),
+                       fill_nan_with_default_values.splitlines()]
         for code_block in code_blocks:
             for _, line in enumerate(code_block):
                 self.code_lines.append(line)
@@ -187,6 +189,7 @@ class PlanCodeGenerator:
                                "        at = attrs[nid]",
                                "        if op=='TableScan':",
                                "            df = pd.read_csv(f\"{prefix}/{table_name[nid]}.csv\", header=None, low_memory=False)",
+                               "            df = fill_nan_with_defaults(df)",
                                "        elif op=='Values':",
                                "            df = pd.DataFrame([[]])",
                                "        elif op=='Filter':",
