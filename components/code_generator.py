@@ -180,7 +180,7 @@ class PlanCodeGenerator:
                                "        before_mem = process.memory_info().rss",
                                "",
                                "        op = op_type[nid]",
-                               "        at = attrs[nid]"
+                               "        at = attrs[nid]",
                                "        if op=='TableScan':",
                                "            df = pd.read_csv(f\"{prefix}/{table_name[nid]}.csv\", header=None, low_memory=False)",
                                "        elif op=='Values':",
@@ -254,7 +254,7 @@ class PlanCodeGenerator:
                                "                df = le_decomposition_join(LE)",
                                "                df.columns = list(range(df.shape[1]))",
                                "            else:",
-                               "                df = pd.DataFrame()"
+                               "                df = pd.DataFrame()",
                                "        else:",
                                "            raise ValueError(f'No such operation type: {op}')",
                                "",
