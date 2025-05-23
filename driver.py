@@ -19,7 +19,7 @@ class TeeOutput:
             stream.flush()
 
 if __name__ == '__main__':
-    calcite_output_file = f'{os.getcwd()}/calcite_outputs/test_plan.txt'.replace("\\", '/')
+    calcite_output_file = f'{os.getcwd()}/calcite_outputs/test_plan_LE_decomposition.txt'.replace("\\", '/')
     execution_tree_visualizations_folder = f'{os.getcwd()}/visualization_outputs'.replace("\\", '/')
     generated_codes_folder = f'{os.getcwd()}/generated_codes'.replace("\\", '/')
     logs_folder = f'{os.getcwd()}/query_outputs'.replace("\\", '/')

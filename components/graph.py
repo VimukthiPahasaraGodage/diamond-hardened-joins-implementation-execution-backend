@@ -60,6 +60,10 @@ def parse_plan(plan_text: str) -> PlanNode:
             attributes = {'table': extract_table_name(raw_attrs)}
         elif op_type == "BindableValues":
             attributes = {'values': []}
+        elif op_type == "BindableLookup":
+            attributes = {k: v for k, v in attr_pattern.findall(raw_attrs)}
+        elif op_type == "BindableExpand":
+            attributes = {k: v for k, v in attr_pattern.findall(raw_attrs)}
         else:
             raise ValueError(f"No such operation type: {op_type}")
 

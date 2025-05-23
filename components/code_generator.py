@@ -3,6 +3,8 @@ from typing import List
 from components.code_generator_components.aggregate_condition import aggregate_condition
 from components.code_generator_components.filter_condition import filter_condition
 from components.code_generator_components.join_algorithms.hash_join_algorithm import partitioned_hash_join_function
+from components.code_generator_components.join_algorithms.le_decomposition_join_algorithm import \
+    le_decomposition_join_function
 from components.code_generator_components.join_condition import join_condition
 from components.code_generator_components.projection_condition import projection_condition
 
@@ -57,7 +59,8 @@ class PlanCodeGenerator:
                        filter_condition.splitlines(),
                        aggregate_condition.splitlines(),
                        projection_condition.splitlines(),
-                       join_condition.splitlines()]
+                       join_condition.splitlines(),
+                       le_decomposition_join_function.splitlines()]
         for code_block in code_blocks:
             for _, line in enumerate(code_block):
                 self.code_lines.append(line)
@@ -166,6 +169,9 @@ class PlanCodeGenerator:
 
     def _emit_make_task(self):
         self.code_lines += [
+                               "LE_stacks_1 = {}",
+                               "LE_stacks_2 = {}",
+                               "",
                                "# --- task factory (no blocking) ---",
                                "def make_task(nid):",
                                "    def task():",
@@ -212,6 +218,32 @@ class PlanCodeGenerator:
                                "                    series = dfs_child.iloc[:, col_idx]",
                                "                    results[out_col] = getattr(series, func)()",
                                "                df = pd.DataFrame([results])",
+                               "        elif op == 'Lookup':",
+                               "            l, r = children[nid]",
+                               "            left_df = dfs[l]",
+                               "            right_df = dfs[r]",
+                               "            jt = at['joinType']",
+                               "            cond = at['condition']",
+                               "            params = build_merge_params(cond, jt, left_df.shape[1], right_df.shape[1])",
+                               "            LE = int(at['LE'])",
+                               "            if LE in LE_stacks_1:",
+                               "                LE_stacks_1[LE].append({'nid': nid, 'l': l, 'r': r, 'jt': jt, 'left_on': params['left_on'], 'right_on': params['right_on']})",
+                               "            else:",
+                               "                LE_stacks_1[LE] = [{'nid': nid, 'l': l, 'r': r, 'jt': jt, 'left_on': params['left_on'], 'right_on': params['right_on']}]",
+                               "        elif op == 'Expand':",
+                               "            lookup_id = int(at['lookup_id'])",
+                               "            LE = int(at['LE'])",
+                               "            info = LE_stacks_1[LE].pop(0)",
+                               "            if info['nid'] == lookup_id:",
+                               "                if LE in LE_stacks_2:",
+                               "                    LE_stacks_2[LE].insert(0, info)",
+                               "                else:",
+                               "                    LE_stacks_2[LE] = [info]",
+                               "            else:",
+                               "                raise ValueError('lookup_id does not match with the id of first element in LE_stack_1')",
+                               "            df = None",
+                               "            if len(LE_stacks_1[LE]) == 0:",
+                               "                df = le_decomposition_join(LE)",
                                "        else:",
                                "            raise ValueError(f'No such operation type: {op}')",
                                "",
