@@ -66,7 +66,7 @@ BindableAggregate(group=[{}], UNCREDITED_VOICED_CHARACTER=[MIN($0)], RUSSIAN_MOV
                         BindableTableScan(table=[[company_name]]), id = 77
             BindableFilter(condition=[=($1, 'actor')]), id = 5584
               BindableTableScan(table=[[role_type]]), id = 113
-        BindableFilter(condition=[>($4, 2005)]), id = 5586
-          BindableTableScan(table=[[title]]), id = 125
+          BindableFilter(condition=[>($4, 2005)]), id = 5586
+            BindableTableScan(table=[[title]]), id = 125
 
 

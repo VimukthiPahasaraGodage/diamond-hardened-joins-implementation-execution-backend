@@ -81,6 +81,6 @@ def le_decomposition_join(LE):
                     join_results.append(r1.tolist() + r2.tolist() + r3.tolist())
                 else:
                     join_results.append(r2.tolist() + r3.tolist() + r1.tolist())
-    df = pd.DataFrame(join_results)
+    df = pd.DataFrame(join_results, columns=range(df_1.shape[1] + df_2.shape[1] + df_3.shape[1]))
     return df
 """
