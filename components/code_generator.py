@@ -37,6 +37,7 @@ class PlanCodeGenerator:
             "import time",
             "import psutil",
             "from collections import defaultdict",
+            "import concurrent.futures",
             "from concurrent.futures import ThreadPoolExecutor",
             "from typing import List, Tuple, Union, Dict",
             "",
@@ -62,7 +63,7 @@ class PlanCodeGenerator:
                        projection_condition.splitlines(),
                        join_condition.splitlines(),
                        le_decomposition_join_function.splitlines(),
-                       multi_threaded_le_decomposition_join_function(),
+                       multi_threaded_le_decomposition_join_function.splitlines(),
                        fill_nan_with_default_values.splitlines()]
         for code_block in code_blocks:
             for _, line in enumerate(code_block):
