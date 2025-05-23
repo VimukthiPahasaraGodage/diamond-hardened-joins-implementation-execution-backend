@@ -263,7 +263,7 @@ class PlanCodeGenerator:
                                "        row_counts[nid] = df.shape[0]",
                                "        mem_usage[nid] = process.memory_info().rss - before_mem",
                                "",
-                               "        if op == 'Join':",
+                               "        if op == 'Join' or op == 'Lookup' or op == 'Expand':",
                                "            with intermediate_lock:",
                                "                total_intermediate_rows += df.shape[0]",
                                "        return df",
