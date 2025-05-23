@@ -44,24 +44,10 @@ LogicalAggregate(group=[{}], UNCREDITED_VOICED_CHARACTER=[MIN($0)], RUSSIAN_MOVI
 
 
 [Physical plan]
-BindableAggregate(group=[{}], UNCREDITED_VOICED_CHARACTER=[MIN($0)], RUSSIAN_MOVIE=[MIN($1)]), id = 5589
-  BindableProject(name=[$1], title=[$31]), id = 5588
-    BindableJoin(condition=[=($24, $30)], joinType=[inner]), id = 5587
-      BindableJoin(condition=[=($28, $13)], joinType=[inner]), id = 5585
-        BindableProject(id1=[$7], name=[$8], imdb_index=[$9], imdb_id=[$10], name_pcode_nf=[$11], surname_pcode=[$12], md5sum=[$13], id00=[$14], person_id=[$15], movie_id0=[$16], person_role_id=[$17], note0=[$18], nr_order=[$19], role_id=[$20], id10=[$21], name0=[$22], country_code=[$23], imdb_id0=[$24], name_pcode_nf0=[$25], name_pcode_sf=[$26], md5sum0=[$27], id0=[$5], kind=[$6], id=[$0], movie_id=[$1], company_id=[$2], company_type_id=[$3], note=[$4]), id = 5583
-          BindableJoin(condition=[AND(=($16, $1), =($21, $2))], joinType=[inner]), id = 5582
-            BindableJoin(condition=[=($5, $3)], joinType=[inner]), id = 5577
-              BindableTableScan(table=[[movie_companies]]), id = 101
-              BindableTableScan(table=[[company_type]]), id = 89
-            BindableJoin(condition=[true], joinType=[inner]), id = 5581
-              BindableJoin(condition=[=($0, $10)], joinType=[inner]), id = 5579
-                BindableTableScan(table=[[char_name]]), id = 61
-                BindableFilter(condition=[AND(LIKE($4, '%voice%'), LIKE($4, '%uncredited%'))]), id = 5578
-                  BindableTableScan(table=[[cast_info]]), id = 65
-              BindableFilter(condition=[=($2, 'ru')]), id = 5580
-                BindableTableScan(table=[[company_name]]), id = 77
-        BindableFilter(condition=[=($1, 'actor')]), id = 5584
-          BindableTableScan(table=[[role_type]]), id = 113
-      BindableFilter(condition=[>($4, 2005)]), id = 5586
-        BindableTableScan(table=[[title]]), id = 125
+BindableAggregate(group=[{}], FROM_COMPANY=[MIN($0)], MOVIE_LINK_TYPE=[MIN($1)], NON_POLISH_SEQUEL_MOVIE=[MIN($2)]), id = 17028
+  BindableProject(name=[$1], link=[$13], title=[$27]), id = 17027
+    BindableJoin(condition=[=($23, $26)], joinType=[inner]), id = 17026
+      BindableValues(tuples=[[]]), id = 16975
+      BindableFilter(condition=[SEARCH($4, Sarg[[1950..2000]])]), id = 17025
+        BindableTableScan(table=[[title]]), id = 16871
 
