@@ -1,21 +1,32 @@
 multi_threaded_le_decomposition_join_function = r"""
+import pandas as pd
+from collections import defaultdict
+import concurrent.futures
+import os
+import math
+
 def le_decomposition_join(
     LE,
     num_threads_join=None,
     num_threads_ht2=None,
     num_threads_ht3=None
 ):
+
+    # ------------------------------------------------------------
+    # 1) SET DEFAULT THREAD COUNTS
+    # ------------------------------------------------------------
     cpu = os.cpu_count() or 1
 
     if num_threads_join is None:
         num_threads_join = cpu
-
     if num_threads_ht2 is None:
         num_threads_ht2 = cpu
-
     if num_threads_ht3 is None:
         num_threads_ht3 = cpu
 
+    # ------------------------------------------------------------
+    # 2) VALIDATE & EXTRACT THE TWO LOOKUP/EXPAND OPS
+    # ------------------------------------------------------------
     if len(LE_stacks_2[LE]) != 2:
         raise ValueError('There should be exactly two Expand operations and two Lookup operations in the LE_stack_2')
 
@@ -28,6 +39,9 @@ def le_decomposition_join(
     df_2 = dfs[second_l]
     df_3 = dfs[second_r]
 
+    # ------------------------------------------------------------
+    # 3) DETERMINE ht_2_key, ht_3_key, AND WHICH SIDE IS df_1
+    # ------------------------------------------------------------
     ht_2_key = []
     ht_3_key = []
 
@@ -64,17 +78,19 @@ def le_decomposition_join(
     else:
         raise ValueError('The nodes for Lookup and Expand are not in the expected configuration')
 
+    # Always add the second lookup (df_2 → df_3) into ht_3_key
     for i in range(len(second['left_on'])):
         ht_3_key.append({
             'df_2': second['left_on'][i],
             'df_3': second['right_on'][i]
         })
 
+    # ------------------------------------------------------------
+    # 4) PARTIAL HASH‐TABLE BUILDERS (FIXED ht_3)
+    # ------------------------------------------------------------
     def build_partial_ht2(row_indices):
         local_ht2 = defaultdict(list)
         hash_cols = [item['df_2'] for item in ht_2_key]
-
-        # If there are no ht_2_key entries, we return an empty local_ht2
         if not hash_cols:
             return local_ht2
 
@@ -86,12 +102,8 @@ def le_decomposition_join(
 
     def build_partial_ht3(row_indices):
         local_ht3 = defaultdict(list)
-        # Only keep those ht_3_key items that map 'df_3' → col_index
-        hash_cols_3 = [
-            item['df_3']
-            for item in ht_3_key
-            if 'df_3' in item and 'df_2' not in item  # skip df_2→df_3 or df_1→df_3 now
-        ]
+        # === FIXED: include every item['df_3'], not just those without 'df_2' ===
+        hash_cols_3 = [item['df_3'] for item in ht_3_key]
 
         if not hash_cols_3:
             return local_ht3
@@ -102,6 +114,9 @@ def le_decomposition_join(
             local_ht3[key].append(row)
         return local_ht3
 
+    # ------------------------------------------------------------
+    # 5) PARTITION df_2 & df_3 INDICES INTO CHUNKS
+    # ------------------------------------------------------------
     def partition_indices(total_rows, num_parts):
         base_size = total_rows // num_parts
         remainder = total_rows % num_parts
@@ -110,7 +125,6 @@ def le_decomposition_join(
         for i in range(num_parts):
             size = base_size + (1 if i < remainder else 0)
             end = start + size
-            # We don't want empty partitions—stop if start >= total_rows
             if start >= total_rows:
                 break
             partitions.append(list(range(start, min(end, total_rows))))
@@ -120,21 +134,24 @@ def le_decomposition_join(
     idx_partitions_2 = partition_indices(df_2.shape[0], num_threads_ht2)
     idx_partitions_3 = partition_indices(df_3.shape[0], num_threads_ht3)
 
+    # ------------------------------------------------------------
+    # 6) BUILD ALL PARTIAL ht_2 & ht_3 IN PARALLEL, THEN MERGE
+    # ------------------------------------------------------------
     global_ht2 = defaultdict(list)
     global_ht3 = defaultdict(list)
 
+    # Build ht_2 in parallel
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads_ht2) as executor:
-        # Submit one future per partition
         futures_ht2 = [
             executor.submit(build_partial_ht2, part_indices)
             for part_indices in idx_partitions_2
         ]
-        # As each partial completes, merge into global_ht2
         for fut in concurrent.futures.as_completed(futures_ht2):
             partial = fut.result()
             for key, rows in partial.items():
                 global_ht2[key].extend(rows)
 
+    # Build ht_3 in parallel (now hashing on all df_3 columns from ht_3_key)
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads_ht3) as executor:
         futures_ht3 = [
             executor.submit(build_partial_ht3, part_indices)
@@ -148,10 +165,16 @@ def le_decomposition_join(
     ht_2 = global_ht2
     ht_3 = global_ht3
 
+    # ------------------------------------------------------------
+    # 7) PREPARE PROBE‐KEY COLUMN LISTS
+    # ------------------------------------------------------------
     probe_ht2_cols = [item['df_1'] for item in ht_2_key]
     probe_ht3_cols_df1 = [item['df_1'] for item in ht_3_key if 'df_1' in item]
     probe_ht3_cols_df2 = [item['df_2'] for item in ht_3_key if 'df_2' in item]
 
+    # ------------------------------------------------------------
+    # 8) DEFINE A WORKER FOR THE FINAL JOIN‐PROBE PHASE
+    # ------------------------------------------------------------
     def join_worker(start_idx, end_idx):
         local_results = []
         for r1_idx in range(start_idx, end_idx):
@@ -165,10 +188,8 @@ def le_decomposition_join(
             for r2 in matching_rows_2:
                 # Build the ht_3 key using r1 & r2
                 key_parts = []
-                # first, columns from r1→df_3
                 for col in probe_ht3_cols_df1:
                     key_parts.append(r1[col])
-                # then, columns from r2→df_3
                 for col in probe_ht3_cols_df2:
                     key_parts.append(r2[col])
                 key_ht3 = tuple(key_parts)
@@ -180,8 +201,10 @@ def le_decomposition_join(
                         local_results.append(r2.tolist() + r3.tolist() + r1.tolist())
         return local_results
 
+    # ------------------------------------------------------------
+    # 9) SPLIT df_1 INTO CHUNKS AND RUN join_worker IN PARALLEL
+    # ------------------------------------------------------------
     total_rows_1 = df_1.shape[0]
-    # Chunk size so that we get at most num_threads_join partitions
     chunk_size_1 = math.ceil(total_rows_1 / num_threads_join)
     boundaries_1 = [
         (i * chunk_size_1, min((i + 1) * chunk_size_1, total_rows_1))
@@ -197,7 +220,10 @@ def le_decomposition_join(
         ]
         for fut in concurrent.futures.as_completed(futures_join):
             join_results.extend(fut.result())
-            
+
+    # ------------------------------------------------------------
+    # 10) ASSEMBLE FINAL DATAFRAME
+    # ------------------------------------------------------------
     total_cols = df_1.shape[1] + df_2.shape[1] + df_3.shape[1]
     result_df = pd.DataFrame(join_results, columns=list(range(total_cols)))
     return result_df
