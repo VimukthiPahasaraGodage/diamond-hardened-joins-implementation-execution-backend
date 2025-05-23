@@ -56,9 +56,9 @@ BindableAggregate(group=[{}], UNCREDITED_VOICED_CHARACTER=[MIN($0)], RUSSIAN_MOV
             BindableJoin(condition=[true], joinType=[inner]), id = 5581
               BindableJoin(condition=[=($0, $10)], joinType=[inner]), id = 5579
                 BindableTableScan(table=[[char_name]]), id = 61
-                BindableFilter(condition=[AND(LIKE($4, '%(voice)%'), LIKE($4, '%(uncredited)%'))]), id = 5578
+                BindableFilter(condition=[AND(LIKE($4, '%voice%'), LIKE($4, '%uncredited%'))]), id = 5578
                   BindableTableScan(table=[[cast_info]]), id = 65
-              BindableFilter(condition=[=($2, '[ru]')]), id = 5580
+              BindableFilter(condition=[=($2, 'ru')]), id = 5580
                 BindableTableScan(table=[[company_name]]), id = 77
         BindableFilter(condition=[=($1, 'actor')]), id = 5584
           BindableTableScan(table=[[role_type]]), id = 113
