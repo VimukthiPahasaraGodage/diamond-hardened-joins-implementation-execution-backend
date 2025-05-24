@@ -3,6 +3,7 @@ import shutil
 import runpy
 import sys
 import argparse
+from pathlib import Path
 
 from components.engine import ExecutionEngine
 
@@ -48,6 +49,7 @@ def parse_args():
 
     parser.add_argument('--visualize', type=int, default=True, help='visualize the execution ready relational tree (0 or 1)')
     parser.add_argument('--std_out_code', type=int, default=False, help='Whether to print the code generated for execution of the query (0 or 1)')
+    parser.add_argument('--opt', type=int, default=False, help='Optimization method to use (norma/ LE-decomposition')
 
     return parser.parse_args()
 
@@ -74,10 +76,10 @@ if __name__ == '__main__':
     )
     visualize = True if args.visualize == 1 else False
     std_out_code = True if args.std_out_code == 1 else False
-    generated_code_paths = engine.execute_queries(join_method=args.join_method, visualize=args.visualize, std_out_code=args.std_out_code)
+    generated_code_paths = engine.execute_queries(join_method=args.join_method, opt=args.opt, visualize=args.visualize, std_out_code=args.std_out_code)
 
     for i, generated_code_path in enumerate(generated_code_paths):
-        log_path = os.path.join(args.logs_folder, f"query_{i}.log")
+        log_path = os.path.join(args.logs_folder, f"{Path(args.calcite_output_file).stem}.log")
         print(f"Executing query {i} ...")
 
         with open(log_path, "w", encoding="utf-8") as log_file:
