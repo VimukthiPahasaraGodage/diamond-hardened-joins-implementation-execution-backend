@@ -10,7 +10,7 @@ def fill_nan_with_defaults(df: pd.DataFrame) -> pd.DataFrame:
             defaults[col] = False
         elif pd.api.types.is_datetime64_any_dtype(dtype):
             defaults[col] = pd.Timestamp(0)
-        elif pd.api.types.is_categorical_dtype(dtype):
+        elif isinstance(dtype, pd.CategoricalDtype):
             defaults[col] = df[col].cat.categories[0] if len(df[col].cat.categories) > 0 else ''
         else:
             # Default for object, string, or unknown types

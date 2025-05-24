@@ -1,5 +1,14 @@
 import os
 import shutil
+import psutil
+import pandas as pd
+import time
+import math
+import threading
+from collections import defaultdict
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
+from typing import List, Tuple, Union, Dict
 from pathlib import Path
 
 from components.code_generator import PlanCodeGenerator
@@ -92,7 +101,7 @@ class ExecutionEngine:
         generated_code = PlanCodeGenerator(root_node, self.csv_dataset_path, join_method).generate()
         return generated_code
 
-    def execute_queries(self, join_method: str = 'auto', visualize: bool = True, std_out_code=False):
+    def execute_queries(self, join_method: str = 'auto', visualize: bool = True, std_out_code: bool = False):
         execution_trees = self.parse_physical_plan_to_execution_tree()
         index = 0
         generated_code_paths = []
@@ -102,7 +111,11 @@ class ExecutionEngine:
             code = self.generate_execution_code_for_execution_tree(root_node, join_method)
 
             if std_out_code:
+                print(
+                    "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
                 print(code)
+                print(
+                    "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
 
             file_path = os.path.join(self.save_folder, f"query_{index}.py")
             with open(file_path, "w", encoding="utf-8") as f:

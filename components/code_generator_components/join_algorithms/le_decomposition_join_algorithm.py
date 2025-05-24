@@ -1,10 +1,4 @@
 multi_threaded_le_decomposition_join_function = r"""
-import pandas as pd
-from collections import defaultdict
-import concurrent.futures
-import os
-import math
-
 def le_decomposition_join(
     LE,
     num_threads_join=None,

@@ -2,6 +2,7 @@ import os
 import shutil
 import runpy
 import sys
+import argparse
 
 from components.engine import ExecutionEngine
 
@@ -18,30 +19,65 @@ class TeeOutput:
         for stream in self.streams:
             stream.flush()
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Execute queries from generated Calcite plans.")
+
+    parser.add_argument('--calcite_output_file', type=str,
+                        required=True,
+                        help='Path to the Calcite output file')
+
+    parser.add_argument('--execution_tree_visualizations_folder', type=str,
+                        required=True,
+                        help='Folder to store execution tree visualizations')
+
+    parser.add_argument('--generated_codes_folder', type=str,
+                        required=True,
+                        help='Folder to store generated Python codes')
+
+    parser.add_argument('--logs_folder', type=str,
+                        required=True,
+                        help='Folder to store logs of executed queries')
+
+    parser.add_argument('--csv_dataset_path', type=str,
+                        required=True,
+                        help='Path to the CSV dataset folder')
+
+    parser.add_argument('--join_method', type=str,
+                        default='hash-join',
+                        help='auto, hash-join')
+
+    parser.add_argument('--visualize', type=int, default=True, help='visualize the execution ready relational tree (0 or 1)')
+    parser.add_argument('--std_out_code', type=int, default=False, help='Whether to print the code generated for execution of the query (0 or 1)')
+
+    return parser.parse_args()
+
 if __name__ == '__main__':
-    calcite_output_file = f'{os.getcwd()}/calcite_outputs/test_plan_benchmark_LE_decomposition.txt'.replace("\\", '/')
-    execution_tree_visualizations_folder = f'{os.getcwd()}/visualization_outputs'.replace("\\", '/')
-    generated_codes_folder = f'{os.getcwd()}/generated_codes'.replace("\\", '/')
-    logs_folder = f'{os.getcwd()}/query_outputs'.replace("\\", '/')
-    csv_dataset_path = 'C:/Benchmark_Dataset'
+    args = parse_args()
 
-    if os.path.exists(execution_tree_visualizations_folder):
-        shutil.rmtree(execution_tree_visualizations_folder)
-    os.makedirs(execution_tree_visualizations_folder)
+    if os.path.exists(args.execution_tree_visualizations_folder):
+        shutil.rmtree(args.execution_tree_visualizations_folder)
+    os.makedirs(args.execution_tree_visualizations_folder)
 
-    if os.path.exists(generated_codes_folder):
-        shutil.rmtree(generated_codes_folder)
-    os.makedirs(generated_codes_folder)
+    if os.path.exists(args.generated_codes_folder):
+        shutil.rmtree(args.generated_codes_folder)
+    os.makedirs(args.generated_codes_folder)
 
-    if os.path.exists(logs_folder):
-        shutil.rmtree(logs_folder)
-    os.makedirs(logs_folder)
+    if os.path.exists(args.logs_folder):
+        shutil.rmtree(args.logs_folder)
+    os.makedirs(args.logs_folder)
 
-    engine = ExecutionEngine(csv_dataset_path, calcite_output_file, execution_tree_visualizations_folder, generated_codes_folder)
-    generated_code_paths = engine.execute_queries(join_method='hash-join', visualize=True, std_out_code=False)
+    engine = ExecutionEngine(
+        args.csv_dataset_path,
+        args.calcite_output_file,
+        args.execution_tree_visualizations_folder,
+        args.generated_codes_folder
+    )
+    visualize = True if args.visualize == 1 else False
+    std_out_code = True if args.std_out_code == 1 else False
+    generated_code_paths = engine.execute_queries(join_method=args.join_method, visualize=args.visualize, std_out_code=args.std_out_code)
 
     for i, generated_code_path in enumerate(generated_code_paths):
-        log_path = os.path.join(logs_folder, f"query_{i}.log")
+        log_path = os.path.join(args.logs_folder, f"query_{i}.log")
         print(f"Executing query {i} ...")
 
         with open(log_path, "w", encoding="utf-8") as log_file:

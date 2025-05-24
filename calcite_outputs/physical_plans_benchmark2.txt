@@ -1,0 +1,530 @@
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT COUNT(*) FROM Products p JOIN Categories c ON p.category_id = c.category_id JOIN Suppliers s ON p.supplier_id = s.supplier_id
+
+[SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `CATEGORIES` AS `C` ON `P`.`CATEGORY_ID` = `C`.`CATEGORY_ID`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`SUPPLIER_ID` = `S`.`SUPPLIER_ID`
+
+[Valid SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `CATEGORIES` AS `C` ON `P`.`category_id` = `C`.`category_id`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`supplier_id` = `S`.`supplier_id`
+
+[Logical plan]
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalJoin(condition=[=($3, $7)], joinType=[inner])
+    LogicalJoin(condition=[=($2, $5)], joinType=[inner])
+      LogicalTableScan(table=[[Products]])
+      LogicalTableScan(table=[[Categories]])
+    LogicalTableScan(table=[[Suppliers]])
+
+
+[Physical plan]
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 10356
+  BindableJoin(condition=[=($3, $7)], joinType=[inner]), id = 10355
+    BindableJoin(condition=[=($2, $5)], joinType=[inner]), id = 10354
+      BindableTableScan(table=[[Products]]), id = 10238
+      BindableTableScan(table=[[Categories]]), id = 10242
+    BindableTableScan(table=[[Suppliers]]), id = 10254
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT COUNT(*) FROM Products p JOIN Suppliers s ON p.supplier_id = s.supplier_id JOIN Regions r ON s.region_id = r.region_id JOIN Countries c ON r.country_id = c.country_id
+
+[SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`SUPPLIER_ID` = `S`.`SUPPLIER_ID`
+INNER JOIN `REGIONS` AS `R` ON `S`.`REGION_ID` = `R`.`REGION_ID`
+INNER JOIN `COUNTRIES` AS `C` ON `R`.`COUNTRY_ID` = `C`.`COUNTRY_ID`
+
+[Valid SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`supplier_id` = `S`.`supplier_id`
+INNER JOIN `REGIONS` AS `R` ON `S`.`region_id` = `R`.`region_id`
+INNER JOIN `COUNTRIES` AS `C` ON `R`.`country_id` = `C`.`country_id`
+
+[Logical plan]
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalJoin(condition=[=($9, $11)], joinType=[inner])
+    LogicalJoin(condition=[=($6, $8)], joinType=[inner])
+      LogicalJoin(condition=[=($3, $5)], joinType=[inner])
+        LogicalTableScan(table=[[Products]])
+        LogicalTableScan(table=[[Suppliers]])
+      LogicalTableScan(table=[[Regions]])
+    LogicalTableScan(table=[[Countries]])
+
+
+[Physical plan]
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 10710
+  BindableJoin(condition=[=($9, $11)], joinType=[inner]), id = 10709
+    BindableJoin(condition=[=($6, $8)], joinType=[inner]), id = 10708
+      BindableJoin(condition=[=($3, $5)], joinType=[inner]), id = 10707
+        BindableTableScan(table=[[Products]]), id = 10390
+        BindableTableScan(table=[[Suppliers]]), id = 10394
+      BindableTableScan(table=[[Regions]]), id = 10406
+    BindableTableScan(table=[[Countries]]), id = 10426
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT COUNT(*) FROM Products p JOIN Suppliers s ON p.supplier_id = s.supplier_id JOIN Manufacturers m ON p.manufacturer_id = m.manufacturer_id JOIN Regions r1 ON s.region_id = r1.region_id JOIN Regions r2 ON m.region_id = r2.region_id
+
+[SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`SUPPLIER_ID` = `S`.`SUPPLIER_ID`
+INNER JOIN `MANUFACTURERS` AS `M` ON `P`.`MANUFACTURER_ID` = `M`.`MANUFACTURER_ID`
+INNER JOIN `REGIONS` AS `R1` ON `S`.`REGION_ID` = `R1`.`REGION_ID`
+INNER JOIN `REGIONS` AS `R2` ON `M`.`REGION_ID` = `R2`.`REGION_ID`
+
+[Valid SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`supplier_id` = `S`.`supplier_id`
+INNER JOIN `MANUFACTURERS` AS `M` ON `P`.`manufacturer_id` = `M`.`manufacturer_id`
+INNER JOIN `REGIONS` AS `R1` ON `S`.`region_id` = `R1`.`region_id`
+INNER JOIN `REGIONS` AS `R2` ON `M`.`region_id` = `R2`.`region_id`
+
+[Logical plan]
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalJoin(condition=[=($9, $14)], joinType=[inner])
+    LogicalJoin(condition=[=($6, $11)], joinType=[inner])
+      LogicalJoin(condition=[=($4, $8)], joinType=[inner])
+        LogicalJoin(condition=[=($3, $5)], joinType=[inner])
+          LogicalTableScan(table=[[Products]])
+          LogicalTableScan(table=[[Suppliers]])
+        LogicalTableScan(table=[[Manufacturers]])
+      LogicalTableScan(table=[[Regions]])
+    LogicalTableScan(table=[[Regions]])
+
+
+[Physical plan]
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 11278
+  BindableJoin(condition=[=($9, $14)], joinType=[inner]), id = 11277
+    BindableJoin(condition=[=($6, $11)], joinType=[inner]), id = 11276
+      BindableJoin(condition=[=($4, $8)], joinType=[inner]), id = 11275
+        BindableJoin(condition=[=($3, $5)], joinType=[inner]), id = 11274
+          BindableTableScan(table=[[Products]]), id = 10750
+          BindableTableScan(table=[[Suppliers]]), id = 10754
+        BindableTableScan(table=[[Manufacturers]]), id = 10766
+      BindableTableScan(table=[[Regions]]), id = 10786
+    BindableTableScan(table=[[Regions]]), id = 10786
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT COUNT(*) FROM Products p JOIN Suppliers s ON p.supplier_id = s.supplier_id JOIN Manufacturers m ON p.manufacturer_id = m.manufacturer_id JOIN Regions r1 ON s.region_id = r1.region_id JOIN Regions r2 ON m.region_id = r2.region_id JOIN Countries c1 ON r1.country_id = c1.country_id
+
+[SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`SUPPLIER_ID` = `S`.`SUPPLIER_ID`
+INNER JOIN `MANUFACTURERS` AS `M` ON `P`.`MANUFACTURER_ID` = `M`.`MANUFACTURER_ID`
+INNER JOIN `REGIONS` AS `R1` ON `S`.`REGION_ID` = `R1`.`REGION_ID`
+INNER JOIN `REGIONS` AS `R2` ON `M`.`REGION_ID` = `R2`.`REGION_ID`
+INNER JOIN `COUNTRIES` AS `C1` ON `R1`.`COUNTRY_ID` = `C1`.`COUNTRY_ID`
+
+[Valid SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`supplier_id` = `S`.`supplier_id`
+INNER JOIN `MANUFACTURERS` AS `M` ON `P`.`manufacturer_id` = `M`.`manufacturer_id`
+INNER JOIN `REGIONS` AS `R1` ON `S`.`region_id` = `R1`.`region_id`
+INNER JOIN `REGIONS` AS `R2` ON `M`.`region_id` = `R2`.`region_id`
+INNER JOIN `COUNTRIES` AS `C1` ON `R1`.`country_id` = `C1`.`country_id`
+
+[Logical plan]
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalJoin(condition=[=($12, $17)], joinType=[inner])
+    LogicalJoin(condition=[=($9, $14)], joinType=[inner])
+      LogicalJoin(condition=[=($6, $11)], joinType=[inner])
+        LogicalJoin(condition=[=($4, $8)], joinType=[inner])
+          LogicalJoin(condition=[=($3, $5)], joinType=[inner])
+            LogicalTableScan(table=[[Products]])
+            LogicalTableScan(table=[[Suppliers]])
+          LogicalTableScan(table=[[Manufacturers]])
+        LogicalTableScan(table=[[Regions]])
+      LogicalTableScan(table=[[Regions]])
+    LogicalTableScan(table=[[Countries]])
+
+
+[Physical plan]
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 12237
+  BindableJoin(condition=[=($12, $17)], joinType=[inner]), id = 12236
+    BindableJoin(condition=[=($9, $14)], joinType=[inner]), id = 12235
+      BindableJoin(condition=[=($6, $11)], joinType=[inner]), id = 12234
+        BindableJoin(condition=[=($4, $8)], joinType=[inner]), id = 12233
+          BindableJoin(condition=[=($3, $5)], joinType=[inner]), id = 12232
+            BindableTableScan(table=[[Products]]), id = 11325
+            BindableTableScan(table=[[Suppliers]]), id = 11329
+          BindableTableScan(table=[[Manufacturers]]), id = 11341
+        BindableTableScan(table=[[Regions]]), id = 11361
+      BindableTableScan(table=[[Regions]]), id = 11361
+    BindableTableScan(table=[[Countries]]), id = 11397
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT COUNT(*) FROM Products p JOIN Suppliers s ON p.supplier_id = s.supplier_id JOIN Manufacturers m ON p.manufacturer_id = m.manufacturer_id JOIN Regions r1 ON s.region_id = r1.region_id JOIN Regions r2 ON m.region_id = r2.region_id JOIN Countries c1 ON r1.country_id = c1.country_id JOIN Countries c2 ON r2.country_id = c2.country_id
+
+[SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`SUPPLIER_ID` = `S`.`SUPPLIER_ID`
+INNER JOIN `MANUFACTURERS` AS `M` ON `P`.`MANUFACTURER_ID` = `M`.`MANUFACTURER_ID`
+INNER JOIN `REGIONS` AS `R1` ON `S`.`REGION_ID` = `R1`.`REGION_ID`
+INNER JOIN `REGIONS` AS `R2` ON `M`.`REGION_ID` = `R2`.`REGION_ID`
+INNER JOIN `COUNTRIES` AS `C1` ON `R1`.`COUNTRY_ID` = `C1`.`COUNTRY_ID`
+INNER JOIN `COUNTRIES` AS `C2` ON `R2`.`COUNTRY_ID` = `C2`.`COUNTRY_ID`
+
+[Valid SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`supplier_id` = `S`.`supplier_id`
+INNER JOIN `MANUFACTURERS` AS `M` ON `P`.`manufacturer_id` = `M`.`manufacturer_id`
+INNER JOIN `REGIONS` AS `R1` ON `S`.`region_id` = `R1`.`region_id`
+INNER JOIN `REGIONS` AS `R2` ON `M`.`region_id` = `R2`.`region_id`
+INNER JOIN `COUNTRIES` AS `C1` ON `R1`.`country_id` = `C1`.`country_id`
+INNER JOIN `COUNTRIES` AS `C2` ON `R2`.`country_id` = `C2`.`country_id`
+
+[Logical plan]
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalJoin(condition=[=($15, $19)], joinType=[inner])
+    LogicalJoin(condition=[=($12, $17)], joinType=[inner])
+      LogicalJoin(condition=[=($9, $14)], joinType=[inner])
+        LogicalJoin(condition=[=($6, $11)], joinType=[inner])
+          LogicalJoin(condition=[=($4, $8)], joinType=[inner])
+            LogicalJoin(condition=[=($3, $5)], joinType=[inner])
+              LogicalTableScan(table=[[Products]])
+              LogicalTableScan(table=[[Suppliers]])
+            LogicalTableScan(table=[[Manufacturers]])
+          LogicalTableScan(table=[[Regions]])
+        LogicalTableScan(table=[[Regions]])
+      LogicalTableScan(table=[[Countries]])
+    LogicalTableScan(table=[[Countries]])
+
+
+[Physical plan]
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 13738
+  BindableJoin(condition=[=($15, $19)], joinType=[inner]), id = 13737
+    BindableJoin(condition=[=($12, $17)], joinType=[inner]), id = 13736
+      BindableJoin(condition=[=($9, $14)], joinType=[inner]), id = 13735
+        BindableJoin(condition=[=($6, $11)], joinType=[inner]), id = 13734
+          BindableJoin(condition=[=($4, $8)], joinType=[inner]), id = 13733
+            BindableJoin(condition=[=($3, $5)], joinType=[inner]), id = 13732
+              BindableTableScan(table=[[Products]]), id = 12290
+              BindableTableScan(table=[[Suppliers]]), id = 12294
+            BindableTableScan(table=[[Manufacturers]]), id = 12306
+          BindableTableScan(table=[[Regions]]), id = 12326
+        BindableTableScan(table=[[Regions]]), id = 12326
+      BindableTableScan(table=[[Countries]]), id = 12362
+    BindableTableScan(table=[[Countries]]), id = 12362
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT COUNT(*) FROM Reviews r JOIN Products p ON r.product_id = p.product_id JOIN Reviewers rv ON r.reviewer_id = rv.reviewer_id JOIN Regions rg ON rv.region_id = rg.region_id JOIN Countries c ON rg.country_id = c.country_id JOIN Suppliers s ON p.supplier_id = s.supplier_id JOIN Regions sr ON s.region_id = sr.region_id
+
+[SqlNode]
+SELECT COUNT(*)
+FROM `REVIEWS` AS `R`
+INNER JOIN `PRODUCTS` AS `P` ON `R`.`PRODUCT_ID` = `P`.`PRODUCT_ID`
+INNER JOIN `REVIEWERS` AS `RV` ON `R`.`REVIEWER_ID` = `RV`.`REVIEWER_ID`
+INNER JOIN `REGIONS` AS `RG` ON `RV`.`REGION_ID` = `RG`.`REGION_ID`
+INNER JOIN `COUNTRIES` AS `C` ON `RG`.`COUNTRY_ID` = `C`.`COUNTRY_ID`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`SUPPLIER_ID` = `S`.`SUPPLIER_ID`
+INNER JOIN `REGIONS` AS `SR` ON `S`.`REGION_ID` = `SR`.`REGION_ID`
+
+[Valid SqlNode]
+SELECT COUNT(*)
+FROM `REVIEWS` AS `R`
+INNER JOIN `PRODUCTS` AS `P` ON `R`.`product_id` = `P`.`product_id`
+INNER JOIN `REVIEWERS` AS `RV` ON `R`.`reviewer_id` = `RV`.`reviewer_id`
+INNER JOIN `REGIONS` AS `RG` ON `RV`.`region_id` = `RG`.`region_id`
+INNER JOIN `COUNTRIES` AS `C` ON `RG`.`country_id` = `C`.`country_id`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`supplier_id` = `S`.`supplier_id`
+INNER JOIN `REGIONS` AS `SR` ON `S`.`region_id` = `SR`.`region_id`
+
+[Logical plan]
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalJoin(condition=[=($18, $20)], joinType=[inner])
+    LogicalJoin(condition=[=($7, $17)], joinType=[inner])
+      LogicalJoin(condition=[=($13, $15)], joinType=[inner])
+        LogicalJoin(condition=[=($11, $12)], joinType=[inner])
+          LogicalJoin(condition=[=($3, $9)], joinType=[inner])
+            LogicalJoin(condition=[=($1, $4)], joinType=[inner])
+              LogicalTableScan(table=[[Reviews]])
+              LogicalTableScan(table=[[Products]])
+            LogicalTableScan(table=[[Reviewers]])
+          LogicalTableScan(table=[[Regions]])
+        LogicalTableScan(table=[[Countries]])
+      LogicalTableScan(table=[[Suppliers]])
+    LogicalTableScan(table=[[Regions]])
+
+
+[Physical plan]
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 15324
+  BindableJoin(condition=[=($18, $20)], joinType=[inner]), id = 15323
+    BindableJoin(condition=[=($7, $17)], joinType=[inner]), id = 15322
+      BindableJoin(condition=[=($13, $15)], joinType=[inner]), id = 15321
+        BindableJoin(condition=[=($11, $12)], joinType=[inner]), id = 15320
+          BindableJoin(condition=[=($3, $9)], joinType=[inner]), id = 15319
+            BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 15318
+              BindableTableScan(table=[[Reviews]]), id = 13792
+              BindableTableScan(table=[[Products]]), id = 13796
+            BindableTableScan(table=[[Reviewers]]), id = 13808
+          BindableTableScan(table=[[Regions]]), id = 13828
+        BindableTableScan(table=[[Countries]]), id = 13848
+      BindableTableScan(table=[[Suppliers]]), id = 13868
+    BindableTableScan(table=[[Regions]]), id = 13828
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT COUNT(*) FROM Products p JOIN Suppliers s ON p.supplier_id = s.supplier_id JOIN Manufacturers m ON p.manufacturer_id = m.manufacturer_id JOIN Regions r1 ON s.region_id = r1.region_id JOIN Regions r2 ON m.region_id = r2.region_id JOIN Countries c1 ON r1.country_id = c1.country_id JOIN Countries c2 ON r2.country_id = c2.country_id JOIN Subcategories sc ON p.category_id = sc.category_id
+
+[SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`SUPPLIER_ID` = `S`.`SUPPLIER_ID`
+INNER JOIN `MANUFACTURERS` AS `M` ON `P`.`MANUFACTURER_ID` = `M`.`MANUFACTURER_ID`
+INNER JOIN `REGIONS` AS `R1` ON `S`.`REGION_ID` = `R1`.`REGION_ID`
+INNER JOIN `REGIONS` AS `R2` ON `M`.`REGION_ID` = `R2`.`REGION_ID`
+INNER JOIN `COUNTRIES` AS `C1` ON `R1`.`COUNTRY_ID` = `C1`.`COUNTRY_ID`
+INNER JOIN `COUNTRIES` AS `C2` ON `R2`.`COUNTRY_ID` = `C2`.`COUNTRY_ID`
+INNER JOIN `SUBCATEGORIES` AS `SC` ON `P`.`CATEGORY_ID` = `SC`.`CATEGORY_ID`
+
+[Valid SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`supplier_id` = `S`.`supplier_id`
+INNER JOIN `MANUFACTURERS` AS `M` ON `P`.`manufacturer_id` = `M`.`manufacturer_id`
+INNER JOIN `REGIONS` AS `R1` ON `S`.`region_id` = `R1`.`region_id`
+INNER JOIN `REGIONS` AS `R2` ON `M`.`region_id` = `R2`.`region_id`
+INNER JOIN `COUNTRIES` AS `C1` ON `R1`.`country_id` = `C1`.`country_id`
+INNER JOIN `COUNTRIES` AS `C2` ON `R2`.`country_id` = `C2`.`country_id`
+INNER JOIN `SUBCATEGORIES` AS `SC` ON `P`.`category_id` = `SC`.`category_id`
+
+[Logical plan]
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalJoin(condition=[=($2, $22)], joinType=[inner])
+    LogicalJoin(condition=[=($15, $19)], joinType=[inner])
+      LogicalJoin(condition=[=($12, $17)], joinType=[inner])
+        LogicalJoin(condition=[=($9, $14)], joinType=[inner])
+          LogicalJoin(condition=[=($6, $11)], joinType=[inner])
+            LogicalJoin(condition=[=($4, $8)], joinType=[inner])
+              LogicalJoin(condition=[=($3, $5)], joinType=[inner])
+                LogicalTableScan(table=[[Products]])
+                LogicalTableScan(table=[[Suppliers]])
+              LogicalTableScan(table=[[Manufacturers]])
+            LogicalTableScan(table=[[Regions]])
+          LogicalTableScan(table=[[Regions]])
+        LogicalTableScan(table=[[Countries]])
+      LogicalTableScan(table=[[Countries]])
+    LogicalTableScan(table=[[Subcategories]])
+
+
+[Physical plan]
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 17230
+  BindableJoin(condition=[=($2, $22)], joinType=[inner]), id = 17229
+    BindableJoin(condition=[=($15, $19)], joinType=[inner]), id = 17228
+      BindableJoin(condition=[=($12, $17)], joinType=[inner]), id = 17227
+        BindableJoin(condition=[=($9, $14)], joinType=[inner]), id = 17226
+          BindableJoin(condition=[=($6, $11)], joinType=[inner]), id = 17225
+            BindableJoin(condition=[=($4, $8)], joinType=[inner]), id = 17224
+              BindableJoin(condition=[=($3, $5)], joinType=[inner]), id = 17223
+                BindableTableScan(table=[[Products]]), id = 15384
+                BindableTableScan(table=[[Suppliers]]), id = 15388
+              BindableTableScan(table=[[Manufacturers]]), id = 15400
+            BindableTableScan(table=[[Regions]]), id = 15420
+          BindableTableScan(table=[[Regions]]), id = 15420
+        BindableTableScan(table=[[Countries]]), id = 15456
+      BindableTableScan(table=[[Countries]]), id = 15456
+    BindableTableScan(table=[[Subcategories]]), id = 15492
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT COUNT(*) FROM Reviews r JOIN Products p ON r.product_id = p.product_id JOIN Reviewers rv ON r.reviewer_id = rv.reviewer_id JOIN Regions rg ON rv.region_id = rg.region_id JOIN Countries c ON rg.country_id = c.country_id JOIN Suppliers s ON p.supplier_id = s.supplier_id JOIN Regions sr ON s.region_id = sr.region_id JOIN Subcategories sc ON p.category_id = sc.category_id
+
+[SqlNode]
+SELECT COUNT(*)
+FROM `REVIEWS` AS `R`
+INNER JOIN `PRODUCTS` AS `P` ON `R`.`PRODUCT_ID` = `P`.`PRODUCT_ID`
+INNER JOIN `REVIEWERS` AS `RV` ON `R`.`REVIEWER_ID` = `RV`.`REVIEWER_ID`
+INNER JOIN `REGIONS` AS `RG` ON `RV`.`REGION_ID` = `RG`.`REGION_ID`
+INNER JOIN `COUNTRIES` AS `C` ON `RG`.`COUNTRY_ID` = `C`.`COUNTRY_ID`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`SUPPLIER_ID` = `S`.`SUPPLIER_ID`
+INNER JOIN `REGIONS` AS `SR` ON `S`.`REGION_ID` = `SR`.`REGION_ID`
+INNER JOIN `SUBCATEGORIES` AS `SC` ON `P`.`CATEGORY_ID` = `SC`.`CATEGORY_ID`
+
+[Valid SqlNode]
+SELECT COUNT(*)
+FROM `REVIEWS` AS `R`
+INNER JOIN `PRODUCTS` AS `P` ON `R`.`product_id` = `P`.`product_id`
+INNER JOIN `REVIEWERS` AS `RV` ON `R`.`reviewer_id` = `RV`.`reviewer_id`
+INNER JOIN `REGIONS` AS `RG` ON `RV`.`region_id` = `RG`.`region_id`
+INNER JOIN `COUNTRIES` AS `C` ON `RG`.`country_id` = `C`.`country_id`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`supplier_id` = `S`.`supplier_id`
+INNER JOIN `REGIONS` AS `SR` ON `S`.`region_id` = `SR`.`region_id`
+INNER JOIN `SUBCATEGORIES` AS `SC` ON `P`.`category_id` = `SC`.`category_id`
+
+[Logical plan]
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalJoin(condition=[=($6, $24)], joinType=[inner])
+    LogicalJoin(condition=[=($18, $20)], joinType=[inner])
+      LogicalJoin(condition=[=($7, $17)], joinType=[inner])
+        LogicalJoin(condition=[=($13, $15)], joinType=[inner])
+          LogicalJoin(condition=[=($11, $12)], joinType=[inner])
+            LogicalJoin(condition=[=($3, $9)], joinType=[inner])
+              LogicalJoin(condition=[=($1, $4)], joinType=[inner])
+                LogicalTableScan(table=[[Reviews]])
+                LogicalTableScan(table=[[Products]])
+              LogicalTableScan(table=[[Reviewers]])
+            LogicalTableScan(table=[[Regions]])
+          LogicalTableScan(table=[[Countries]])
+        LogicalTableScan(table=[[Suppliers]])
+      LogicalTableScan(table=[[Regions]])
+    LogicalTableScan(table=[[Subcategories]])
+
+
+[Physical plan]
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 19221
+  BindableJoin(condition=[=($6, $24)], joinType=[inner]), id = 19220
+    BindableJoin(condition=[=($18, $20)], joinType=[inner]), id = 19219
+      BindableJoin(condition=[=($7, $17)], joinType=[inner]), id = 19218
+        BindableJoin(condition=[=($13, $15)], joinType=[inner]), id = 19217
+          BindableJoin(condition=[=($11, $12)], joinType=[inner]), id = 19216
+            BindableJoin(condition=[=($3, $9)], joinType=[inner]), id = 19215
+              BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 19214
+                BindableTableScan(table=[[Reviews]]), id = 17291
+                BindableTableScan(table=[[Products]]), id = 17295
+              BindableTableScan(table=[[Reviewers]]), id = 17307
+            BindableTableScan(table=[[Regions]]), id = 17327
+          BindableTableScan(table=[[Countries]]), id = 17347
+        BindableTableScan(table=[[Suppliers]]), id = 17367
+      BindableTableScan(table=[[Regions]]), id = 17327
+    BindableTableScan(table=[[Subcategories]]), id = 17403
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT COUNT(*) FROM Products p JOIN Categories c ON p.category_id = c.category_id JOIN Manufacturers m ON p.manufacturer_id = m.manufacturer_id JOIN Reviews r ON r.product_id = p.product_id JOIN Reviewers rv ON r.reviewer_id = rv.reviewer_id JOIN Regions rg ON rv.region_id = rg.region_id
+
+[SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `CATEGORIES` AS `C` ON `P`.`CATEGORY_ID` = `C`.`CATEGORY_ID`
+INNER JOIN `MANUFACTURERS` AS `M` ON `P`.`MANUFACTURER_ID` = `M`.`MANUFACTURER_ID`
+INNER JOIN `REVIEWS` AS `R` ON `R`.`PRODUCT_ID` = `P`.`PRODUCT_ID`
+INNER JOIN `REVIEWERS` AS `RV` ON `R`.`REVIEWER_ID` = `RV`.`REVIEWER_ID`
+INNER JOIN `REGIONS` AS `RG` ON `RV`.`REGION_ID` = `RG`.`REGION_ID`
+
+[Valid SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `CATEGORIES` AS `C` ON `P`.`category_id` = `C`.`category_id`
+INNER JOIN `MANUFACTURERS` AS `M` ON `P`.`manufacturer_id` = `M`.`manufacturer_id`
+INNER JOIN `REVIEWS` AS `R` ON `R`.`product_id` = `P`.`product_id`
+INNER JOIN `REVIEWERS` AS `RV` ON `R`.`reviewer_id` = `RV`.`reviewer_id`
+INNER JOIN `REGIONS` AS `RG` ON `RV`.`region_id` = `RG`.`region_id`
+
+[Logical plan]
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalJoin(condition=[=($16, $17)], joinType=[inner])
+    LogicalJoin(condition=[=($13, $14)], joinType=[inner])
+      LogicalJoin(condition=[=($11, $0)], joinType=[inner])
+        LogicalJoin(condition=[=($4, $7)], joinType=[inner])
+          LogicalJoin(condition=[=($2, $5)], joinType=[inner])
+            LogicalTableScan(table=[[Products]])
+            LogicalTableScan(table=[[Categories]])
+          LogicalTableScan(table=[[Manufacturers]])
+        LogicalTableScan(table=[[Reviews]])
+      LogicalTableScan(table=[[Reviewers]])
+    LogicalTableScan(table=[[Regions]])
+
+
+[Physical plan]
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 20423
+  BindableJoin(condition=[=($16, $17)], joinType=[inner]), id = 20422
+    BindableJoin(condition=[=($13, $14)], joinType=[inner]), id = 20421
+      BindableJoin(condition=[=($11, $0)], joinType=[inner]), id = 20420
+        BindableJoin(condition=[=($4, $7)], joinType=[inner]), id = 20419
+          BindableJoin(condition=[=($2, $5)], joinType=[inner]), id = 20418
+            BindableTableScan(table=[[Products]]), id = 19269
+            BindableTableScan(table=[[Categories]]), id = 19273
+          BindableTableScan(table=[[Manufacturers]]), id = 19285
+        BindableTableScan(table=[[Reviews]]), id = 19305
+      BindableTableScan(table=[[Reviewers]]), id = 19325
+    BindableTableScan(table=[[Regions]]), id = 19345
+
+
+------------------------------------------------------------------------------------------------------------------
+[SQL Query]
+SELECT COUNT(*) FROM Products p JOIN Suppliers s ON p.supplier_id = s.supplier_id JOIN Manufacturers m ON p.manufacturer_id = m.manufacturer_id JOIN Regions r1 ON s.region_id = r1.region_id JOIN Regions r2 ON m.region_id = r2.region_id JOIN Countries c1 ON r1.country_id = c1.country_id JOIN Countries c2 ON r2.country_id = c2.country_id WHERE NOT c1.name = c2.name
+
+[SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`SUPPLIER_ID` = `S`.`SUPPLIER_ID`
+INNER JOIN `MANUFACTURERS` AS `M` ON `P`.`MANUFACTURER_ID` = `M`.`MANUFACTURER_ID`
+INNER JOIN `REGIONS` AS `R1` ON `S`.`REGION_ID` = `R1`.`REGION_ID`
+INNER JOIN `REGIONS` AS `R2` ON `M`.`REGION_ID` = `R2`.`REGION_ID`
+INNER JOIN `COUNTRIES` AS `C1` ON `R1`.`COUNTRY_ID` = `C1`.`COUNTRY_ID`
+INNER JOIN `COUNTRIES` AS `C2` ON `R2`.`COUNTRY_ID` = `C2`.`COUNTRY_ID`
+WHERE NOT `C1`.`NAME` = `C2`.`NAME`
+
+[Valid SqlNode]
+SELECT COUNT(*)
+FROM `PRODUCTS` AS `P`
+INNER JOIN `SUPPLIERS` AS `S` ON `P`.`supplier_id` = `S`.`supplier_id`
+INNER JOIN `MANUFACTURERS` AS `M` ON `P`.`manufacturer_id` = `M`.`manufacturer_id`
+INNER JOIN `REGIONS` AS `R1` ON `S`.`region_id` = `R1`.`region_id`
+INNER JOIN `REGIONS` AS `R2` ON `M`.`region_id` = `R2`.`region_id`
+INNER JOIN `COUNTRIES` AS `C1` ON `R1`.`country_id` = `C1`.`country_id`
+INNER JOIN `COUNTRIES` AS `C2` ON `R2`.`country_id` = `C2`.`country_id`
+WHERE NOT `C1`.`name` = `C2`.`name`
+
+[Logical plan]
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalFilter(condition=[NOT(=($18, $20))])
+    LogicalJoin(condition=[=($15, $19)], joinType=[inner])
+      LogicalJoin(condition=[=($12, $17)], joinType=[inner])
+        LogicalJoin(condition=[=($9, $14)], joinType=[inner])
+          LogicalJoin(condition=[=($6, $11)], joinType=[inner])
+            LogicalJoin(condition=[=($4, $8)], joinType=[inner])
+              LogicalJoin(condition=[=($3, $5)], joinType=[inner])
+                LogicalTableScan(table=[[Products]])
+                LogicalTableScan(table=[[Suppliers]])
+              LogicalTableScan(table=[[Manufacturers]])
+            LogicalTableScan(table=[[Regions]])
+          LogicalTableScan(table=[[Regions]])
+        LogicalTableScan(table=[[Countries]])
+      LogicalTableScan(table=[[Countries]])
+
+
+[Physical plan]
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 65964
+  BindableJoin(condition=[AND(=($15, $19), NOT(=($18, $20)))], joinType=[inner]), id = 65963
+    BindableJoin(condition=[=($12, $17)], joinType=[inner]), id = 65962
+      BindableJoin(condition=[=($9, $14)], joinType=[inner]), id = 65961
+        BindableJoin(condition=[=($6, $11)], joinType=[inner]), id = 65960
+          BindableJoin(condition=[=($4, $8)], joinType=[inner]), id = 65959
+            BindableJoin(condition=[=($3, $5)], joinType=[inner]), id = 65958
+              BindableTableScan(table=[[Products]]), id = 20479
+              BindableTableScan(table=[[Suppliers]]), id = 20483
+            BindableTableScan(table=[[Manufacturers]]), id = 20495
+          BindableTableScan(table=[[Regions]]), id = 20515
+        BindableTableScan(table=[[Regions]]), id = 20515
+      BindableTableScan(table=[[Countries]]), id = 20551
+    BindableTableScan(table=[[Countries]]), id = 20551
+
+

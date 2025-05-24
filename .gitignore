@@ -5,3 +5,9 @@ notebooks
 visualization_outputs
 generated_codes
 query_outputs
+driver.spec
+dist/generated_codes
+dist/query_outputs
+dist/visualization_outputs
+dist/calcite_outputs
+build

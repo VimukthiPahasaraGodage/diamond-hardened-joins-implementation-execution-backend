@@ -36,16 +36,14 @@ LogicalProject(ID=[$0])
 
 
 [Physical plan]
-BindableProject(ID=[$0], VALUE_A=[$19]), id = 5681
-  BindableJoin(condition=[AND(=($13, $18), =($16, $18))], joinType=[inner]), id = 5680
-    BindableJoin(condition=[=($6, $15)], joinType=[inner]), id = 5679
-      BindableJoin(condition=[=($5, $12)], joinType=[inner]), id = 5678
-        BindableJoin(condition=[=($2, $8)], joinType=[inner]), id = 5677
-          BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 5676
-            BindableTableScan(table=[[F]]), id = 47
-            BindableTableScan(table=[[D]]), id = 51
-          BindableTableScan(table=[[E]]), id = 63
-        BindableTableScan(table=[[B]]), id = 83
-      BindableTableScan(table=[[C]]), id = 103
-    BindableTableScan(table=[[A]]), id = 123
+BindableAggregate(group=[{}], EXPR$0=[COUNT()]), id = 127567
+  BindableJoin(condition=[=($9, $14)], joinType=[inner]), id = 127566
+    BindableJoin(condition=[AND(=($6, $11), =($9, $12))], joinType=[inner]), id = 127565
+      BindableJoin(condition=[=($5, $8)], joinType=[inner]), id = 127564
+        BindableJoin(condition=[=($1, $4)], joinType=[inner]), id = 127563
+          BindableTableScan(table=[[F]]), id = 126337
+          BindableTableScan(table=[[D]]), id = 126341
+        BindableTableScan(table=[[B]]), id = 126353
+      BindableTableScan(table=[[C]]), id = 126373
+    BindableTableScan(table=[[A]]), id = 126393
 
