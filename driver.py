@@ -78,15 +78,16 @@ if __name__ == '__main__':
     std_out_code = True if args.std_out_code == 1 else False
     generated_code_paths = engine.execute_queries(join_method=args.join_method, opt=args.opt, visualize=args.visualize, std_out_code=args.std_out_code)
 
-    for i, generated_code_path in enumerate(generated_code_paths):
-        log_path = os.path.join(args.logs_folder, f"{Path(args.calcite_output_file).stem}.log")
-        print(f"Executing query {i} ...")
+    if not generated_code_paths:
+        for i, generated_code_path in enumerate(generated_code_paths):
+            log_path = os.path.join(args.logs_folder, f"{Path(args.calcite_output_file).stem}.log")
+            print(f"Executing query {i} ...")
 
-        with open(log_path, "w", encoding="utf-8") as log_file:
-            tee = TeeOutput(sys.stdout, log_file)
-            original_stdout = sys.stdout
-            sys.stdout = tee
-            try:
-                runpy.run_path(generated_code_path, run_name="__main__")
-            finally:
-                sys.stdout = original_stdout
+            with open(log_path, "w", encoding="utf-8") as log_file:
+                tee = TeeOutput(sys.stdout, log_file)
+                original_stdout = sys.stdout
+                sys.stdout = tee
+                try:
+                    runpy.run_path(generated_code_path, run_name="__main__")
+                finally:
+                    sys.stdout = original_stdout

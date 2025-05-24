@@ -233,6 +233,7 @@ class ExecutionEngine:
                 root_node = opt_engine.get_optimized_tree()
                 if not root_node:
                     print("Lookup and Expand decomposition optimization failed!")
+                    return None
                 else:
                     opt_tree_text = f"\n[Physical Plan - Lookup & Expand Optimized]\n{opt_engine.get_optimized_tree_text()}"
                     print(opt_tree_text)
