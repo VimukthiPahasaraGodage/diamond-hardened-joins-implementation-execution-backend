@@ -309,3 +309,88 @@ def le_decomposition_join(LE):
     df = pd.DataFrame(join_results, columns=range(df_1.shape[1] + df_2.shape[1] + df_3.shape[1]))
     return df
 """
+
+le_decomposition_join_function_v2 = r"""
+import pandas as pd
+from collections import defaultdict
+
+def le_decomposition_join(LE):
+    if len(LE_stacks_2[LE]) != 2:
+        raise ValueError('There should be exactly two Expand operations and two Lookup operations in the LE_stack_2')
+
+    first = LE_stacks_2[LE][0]
+    second = LE_stacks_2[LE][1]
+
+    first_l, first_r = children[first['nid']]
+    second_l, second_r = children[second['nid']]
+    df_2 = dfs[second_l]
+    df_3 = dfs[second_r]
+
+    ht_2_key = []
+    ht_3_key = []
+
+    if op_type[first_r] == 'Lookup':
+        df_1 = dfs[first_l]
+        for l, r in zip(first['left_on'], first['right_on']):
+            if r < df_2.shape[1]:
+                ht_2_key.append((l, r))
+            elif r < df_2.shape[1] + df_3.shape[1]:
+                ht_3_key.append((l, r - df_2.shape[1], 'df_1'))
+            else:
+                raise ValueError("Join index out of bound")
+        df_1_left = True
+    elif op_type[first_l] == 'Lookup':
+        df_1 = dfs[first_r]
+        for r, l in zip(first['right_on'], first['left_on']):
+            if l < df_2.shape[1]:
+                ht_2_key.append((r, l))
+            elif l < df_2.shape[1] + df_3.shape[1]:
+                ht_3_key.append((r, l - df_2.shape[1], 'df_1'))
+            else:
+                raise ValueError("Join index out of bound")
+        df_1_left = False
+    else:
+        raise ValueError('The nodes for Lookup and Expand are not in the standard')
+
+    for l, r in zip(second['left_on'], second['right_on']):
+        ht_3_key.append((l, r, 'df_2'))
+
+    # Create hash table for df_2
+    ht_2 = defaultdict(list)
+    df_2_values = df_2.values
+    for i in range(len(df_2)):
+        row = df_2_values[i]
+        key = tuple(row[r] for _, r in ht_2_key)
+        ht_2[key].append(row)
+
+    # Create hash table for df_3
+    ht_3 = defaultdict(list)
+    df_3_values = df_3.values
+    for i in range(len(df_3)):
+        row = df_3_values[i]
+        key = tuple(row[r] for _, r, source in ht_3_key if source == 'df_3')
+        ht_3[key].append(row)
+
+    # Join phase
+    df_1_values = df_1.values
+    join_results = []
+
+    for i in range(len(df_1_values)):
+        r1 = df_1_values[i]
+        ht2_key = tuple(r1[l] for l, _ in ht_2_key)
+        for r2 in ht_2.get(ht2_key, []):
+            ht3_key_vals = []
+            for l, _, src in ht_3_key:
+                if src == 'df_1':
+                    ht3_key_vals.append(r1[l])
+                elif src == 'df_2':
+                    ht3_key_vals.append(r2[l])
+            ht3_key_tuple = tuple(ht3_key_vals)
+            for r3 in ht_3.get(ht3_key_tuple, []):
+                if df_1_left:
+                    join_results.append((*r1, *r2, *r3))
+                else:
+                    join_results.append((*r2, *r3, *r1))
+
+    return pd.DataFrame.from_records(join_results)
+"""
