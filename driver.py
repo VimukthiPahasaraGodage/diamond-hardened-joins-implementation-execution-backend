@@ -81,7 +81,7 @@ if __name__ == '__main__':
     if generated_code_paths:
         for i, generated_code_path in enumerate(generated_code_paths):
             log_path = os.path.join(args.logs_folder, f"{Path(args.calcite_output_file).stem}.log")
-            print(f"\nExecuting query ...")
+            print(f"\nExecuting query...")
 
             with open(log_path, "w", encoding="utf-8") as log_file:
                 tee = TeeOutput(sys.stdout, log_file)
