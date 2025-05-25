@@ -58,8 +58,8 @@ class PlanCodeGenerator:
         ]
 
     def _emit_functions_for_conditions(self):
-        code_blocks = [multithreaded_hash_join_function.splitlines(),
-                       # partitioned_hash_join_function.splitlines(),
+        code_blocks = [# multithreaded_hash_join_function.splitlines(),
+                       partitioned_hash_join_function.splitlines(),
                        filter_condition.splitlines(),
                        aggregate_condition.splitlines(),
                        projection_condition.splitlines(),
