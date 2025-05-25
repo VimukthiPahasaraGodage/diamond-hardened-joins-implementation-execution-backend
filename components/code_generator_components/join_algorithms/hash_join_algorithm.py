@@ -74,7 +74,7 @@ def partitioned_hash_join(
         left_is_build = False
         
     # 2. Compute partition count based on NUMBER OF ROWS
-    TARGET_SIZE = 100
+    TARGET_SIZE = 10000
     num_rows = probe_df.shape[0]
     P = max(1, (num_rows + TARGET_SIZE - 1) // TARGET_SIZE)
     max_workers = min(P, os.cpu_count() or P)
