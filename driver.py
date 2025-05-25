@@ -56,17 +56,17 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
 
-    if os.path.exists(args.execution_tree_visualizations_folder):
-        shutil.rmtree(args.execution_tree_visualizations_folder)
-    os.makedirs(args.execution_tree_visualizations_folder)
+    # if os.path.exists(args.execution_tree_visualizations_folder):
+    #     shutil.rmtree(args.execution_tree_visualizations_folder)
+    os.makedirs(args.execution_tree_visualizations_folder, exist_ok=True)
 
-    if os.path.exists(args.generated_codes_folder):
-        shutil.rmtree(args.generated_codes_folder)
-    os.makedirs(args.generated_codes_folder)
+    # if os.path.exists(args.generated_codes_folder):
+    #     shutil.rmtree(args.generated_codes_folder)
+    os.makedirs(args.generated_codes_folder, exist_ok=True)
 
-    if os.path.exists(args.logs_folder):
-        shutil.rmtree(args.logs_folder)
-    os.makedirs(args.logs_folder)
+    # if os.path.exists(args.logs_folder):
+    #     shutil.rmtree(args.logs_folder)
+    os.makedirs(args.logs_folder, exist_ok=True)
 
     engine = ExecutionEngine(
         args.csv_dataset_path,
