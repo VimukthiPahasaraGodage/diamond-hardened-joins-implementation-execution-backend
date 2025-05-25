@@ -1,5 +1,5 @@
 multithreaded_hash_join_function = r"""
-def multithreaded_hash_join(
+def hash_join(
         left_df: pd.DataFrame,
         right_df: pd.DataFrame,
         left_on: List[int],
@@ -59,7 +59,7 @@ def multithreaded_hash_join(
 """
 
 partitioned_hash_join_function = r"""
-def partitioned_hash_join(
+def hash_join(
         left_df: pd.DataFrame,
         right_df: pd.DataFrame,
         left_on: List[str],

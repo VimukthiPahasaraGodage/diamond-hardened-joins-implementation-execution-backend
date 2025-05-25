@@ -3,7 +3,7 @@ from typing import List
 from components.code_generator_components.aggregate_condition import aggregate_condition
 from components.code_generator_components.filter_condition import filter_condition
 from components.code_generator_components.helper_functions import fill_nan_with_default_values
-from components.code_generator_components.join_algorithms.hash_join_algorithm import partitioned_hash_join_function
+from components.code_generator_components.join_algorithms.hash_join_algorithm import partitioned_hash_join_function, multithreaded_hash_join_function
 from components.code_generator_components.join_algorithms.le_decomposition_join_algorithm import \
     le_decomposition_join_function, multi_threaded_le_decomposition_join_function
 from components.code_generator_components.join_condition import join_condition
@@ -58,7 +58,8 @@ class PlanCodeGenerator:
         ]
 
     def _emit_functions_for_conditions(self):
-        code_blocks = [partitioned_hash_join_function.splitlines(),
+        code_blocks = [multithreaded_hash_join_function.splitlines(),
+                       # partitioned_hash_join_function.splitlines(),
                        filter_condition.splitlines(),
                        aggregate_condition.splitlines(),
                        projection_condition.splitlines(),
@@ -160,7 +161,7 @@ class PlanCodeGenerator:
                 "                df = left_df.merge(right_df, on='_tmp', how=params['how']).drop('_tmp', axis=1)",
                 "            else:",
                 "                if params['how'] == 'inner':",
-                "                    df = partitioned_hash_join(",
+                "                    df = hash_join(",
                 "                        left_df,",
                 "                        right_df,",
                 "                        params['left_on'],",
