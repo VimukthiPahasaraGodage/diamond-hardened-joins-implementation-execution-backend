@@ -5,7 +5,7 @@ from components.code_generator_components.filter_condition import filter_conditi
 from components.code_generator_components.helper_functions import fill_nan_with_default_values
 from components.code_generator_components.join_algorithms.hash_join_algorithm import partitioned_hash_join_function, multithreaded_hash_join_function
 from components.code_generator_components.join_algorithms.le_decomposition_join_algorithm import \
-    le_decomposition_join_function, multi_threaded_le_decomposition_join_function, le_decomposition_join_function_v2
+    le_decomposition_join_function, multi_threaded_le_decomposition_join_function
 from components.code_generator_components.join_condition import join_condition
 from components.code_generator_components.projection_condition import projection_condition
 
@@ -64,8 +64,7 @@ class PlanCodeGenerator:
                        aggregate_condition.splitlines(),
                        projection_condition.splitlines(),
                        join_condition.splitlines(),
-                       #le_decomposition_join_function.splitlines(),
-                       le_decomposition_join_function_v2.splitlines(),
+                       le_decomposition_join_function.splitlines(),
                        # multi_threaded_le_decomposition_join_function.splitlines(),
                        fill_nan_with_default_values.splitlines()]
         for code_block in code_blocks:
